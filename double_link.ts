@@ -64,9 +64,9 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
 
           let path;
           if (note === undefined) {
-            path = label;
+            path = label + ".html";
           } else {
-            path = note.path.replace(".md", ".html");
+            path = note.url().replace(".md", ".html");
           }
           state.pos = labelStart;
           state.posMax = labelEnd;

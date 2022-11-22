@@ -18,13 +18,19 @@ import { highlightCode } from "./highlight.ts";
 export class Vault {
   notes: Array<Note> = [];
   path: string;
+  rootUrl: string;
   assetPath: string;
   files: Array<string>;
   renderer: MarkdownIt;
   tags: Record<string, Set<Note>> = {};
 
-  constructor(path: string, attachmentFolderPath?: string) {
+  constructor(
+    path: string,
+    attachmentFolderPath?: string,
+    rootUrl: string = "/"
+  ) {
     this.path = path;
+    this.rootUrl = rootUrl;
 
     if (!attachmentFolderPath) {
       const obsConfig = JSON.parse(
@@ -141,6 +147,10 @@ export class Note {
     return join(this.vault.path, this.path);
   }
 
+  url(): string {
+    return join("/", this.vault.rootUrl, this.path);
+  }
+
   name(): string {
     return parse(this.path).name;
   }
@@ -164,12 +174,14 @@ export class ParseEnv {
     const absPath = join(noteDir, name);
 
     if (existsSync(absPath)) {
-      return "/" + relative(this.vault.path, absPath);
+      return "/" + join(this.vault.rootUrl, relative(this.vault.path, absPath));
     }
 
     const assetPath = join(this.vault.path, this.vault.assetPath, name);
     if (existsSync(assetPath)) {
-      return "/" + relative(this.vault.path, assetPath);
+      return (
+        "/" + join(this.vault.rootUrl, relative(this.vault.path, assetPath))
+      );
     }
 
     return name;

@@ -62,6 +62,7 @@ const exportVault = async (vault: Vault, dest: string) => {
           throw new Error(`could not find note ${entry.name} at ${relPath}`);
         }
         const htmlContent = render(
+          vault,
           entry.name.replace(".md", ""),
           note.render()
         );
@@ -82,15 +83,20 @@ const exportVault = async (vault: Vault, dest: string) => {
     await ensureDir(tagDir);
     const tagFile = join(tagDir, "index.html");
     await ensureFile(tagFile);
-    await Deno.writeTextFile(tagFile, renderNotesList([...notes]));
+    await Deno.writeTextFile(
+      tagFile,
+      renderNotesList([...notes], vault.rootUrl)
+    );
   }
   console.log("Done!");
 };
 
-const httpServer = async (dest: string) => {
+const httpServer = async (rootUrl: string, dest: string) => {
+  if (rootUrl.endsWith("/")) rootUrl = rootUrl.slice(0, rootUrl.length - 1);
+  console.log("rootUrl", rootUrl);
   await serve(
     (req) => {
-      return serveDir(req, { fsRoot: dest });
+      return serveDir(req, { urlRoot: rootUrl, fsRoot: dest });
     },
     {
       port: 8080,
@@ -114,14 +120,18 @@ if (Deno.args.length < 2) {
 }
 
 const options = flags.parse(Deno.args.slice(2), {
-  string: ["output", "attachment-folder-path"],
+  string: ["output", "attachment-folder-path", "root-url"],
   negatable: ["css"],
 });
 
 const vaultPath = normalize(Deno.args[1]);
 console.log(`Loading vault at '${vaultPath}'`);
 
-const vault = new Vault(vaultPath, options["attachment-folder-path"]);
+const vault = new Vault(
+  vaultPath,
+  options["attachment-folder-path"],
+  options["root-url"]
+);
 console.log("Found", vault.notes.length, "notes");
 
 if (options.css) {
@@ -134,6 +144,9 @@ switch (cmd) {
     await exportVault(vault, dest);
     break;
   case "serve":
-    await Promise.all([exportVault(vault, dest), httpServer(dest)]);
+    await Promise.all([
+      exportVault(vault, dest),
+      httpServer(vault.rootUrl, dest),
+    ]);
     break;
 }

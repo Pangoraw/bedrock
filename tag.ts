@@ -1,3 +1,5 @@
+import { env } from "https://deno.land/std@0.165.0/node/process.ts";
+import { join } from "https://deno.land/std@0.165.0/path/win32.ts";
 import { MarkdownIt, ParseInlineState } from "./ParseState.ts";
 import { ParseEnv } from "./Vault.ts";
 
@@ -41,7 +43,7 @@ export default function tag_plugin(md: MarkdownIt, _opts: any) {
 
         const tagWord = state.src.slice(wordStart, wordEnd);
         token.attrs = [
-          ["href", "/tags/" + tagWord],
+          ["href", join("/", state.env.vault.rootUrl, "/tags/", tagWord)],
           ["class", "tag"],
         ];
 

@@ -40,11 +40,11 @@ const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
   );
 };
 
-const template = (name: string, content: string) => {
+const template = (name: string, content: string, rootUrl: string = "/") => {
   return (
     <html>
       <head>
-        <link rel="stylesheet" href="/style.css" />
+        <link rel="stylesheet" href={"/" + join(rootUrl, "style.css")} />
         <meta charSet="utf-8"></meta>
         <title>{name}</title>
       </head>
@@ -53,7 +53,7 @@ const template = (name: string, content: string) => {
           <nav className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl mb-5 py-2 border-b border-zinc-200 flex">
             <a
               className="flex hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
-              href="/"
+              href={"/" + rootUrl}
             >
               Home
             </a>
@@ -74,21 +74,25 @@ const template = (name: string, content: string) => {
   );
 };
 
-export const renderNotesList = (notes: Array<Note>): string => {
+export const renderNotesList = (
+  notes: Array<Note>,
+  rootUrl: string
+): string => {
   let content = "<ul>";
   for (const note of notes) {
-    content += `\n<li><a href="${note.path.replace(
-      ".md",
-      ".html"
+    content += `\n<li><a href="${join(
+      "/",
+      rootUrl,
+      note.path.replace(".md", ".html")
     )}">${note.path.replace(".md", "")}</a></li>`;
   }
   content += "</ul>";
-  return ReactDOMServer.renderToString(template("index", content));
+  return ReactDOMServer.renderToString(template("index", content, rootUrl));
 };
 
 export const renderIndexPage = (vault: Vault): string => {
-  return renderNotesList(vault.notes);
+  return renderNotesList(vault.notes, vault.rootUrl);
 };
 
-export const render = (title: string, content: string): string =>
-  ReactDOMServer.renderToString(template(title, content));
+export const render = (vault: Vault, title: string, content: string): string =>
+  ReactDOMServer.renderToString(template(title, content, vault.rootUrl));
