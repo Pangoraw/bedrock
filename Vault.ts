@@ -12,7 +12,6 @@ import double_link from "./double_link.ts";
 import tag_plugin from "./tag.ts";
 import callout_box from "./callout_box.ts";
 import { walkSync } from "https://deno.land/std@0.165.0/fs/walk.ts";
-import { exists } from "https://deno.land/std@0.165.0/fs/exists.ts";
 import { existsSync } from "https://deno.land/std@0.165.0/node/fs.ts";
 
 export class Vault {
@@ -25,7 +24,11 @@ export class Vault {
 
   constructor(path: string) {
     this.path = path;
-    this.assetPath = "Images";
+
+    const obsConfig = JSON.parse(
+      Deno.readTextFileSync(join(this.path, ".obsidian", "app.json"))
+    );
+    this.assetPath = obsConfig.attachmentFolderPath;
 
     this.files = [];
     this.exploreDir("/");
