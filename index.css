@@ -3,30 +3,31 @@
 @tailwind utilities;
 
 blockquote.callout-help {
-    border-left: 3px blue solid;
-    padding-left: 5px;
+  border-left: 3px blue solid;
+  padding-left: 5px;
 }
 
 .tag {
-    @apply px-2 text-sm rounded-full border border-solid border-gray-800 bg-blue-100 hover:bg-blue-200 no-underline;
+  @apply px-2 text-sm rounded-full border border-solid border-gray-800 bg-blue-100 hover:bg-blue-200 no-underline;
 }
 
 .prose ul > li > :last-child,
 .prose ul > li > :first-child,
 .prose ul > li {
-    margin-bottom: 0;
-    margin-top: 0;
+  margin-bottom: 0;
+  margin-top: 0;
 }
 
 ul.contains-task-list {
-    @apply list-none pl-3;
+  @apply list-none pl-3;
 }
 
 mjx-container svg {
-    display: inline;
+  display: inline;
 }
 
 mjx-container {
-    display: inline;
-    box-sizing: border-box;
+  display: inline;
+  box-sizing: border-box;
+  overflow-x: scroll;
 }

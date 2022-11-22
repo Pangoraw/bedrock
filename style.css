@@ -1102,6 +1102,7 @@ mjx-container svg {
 mjx-container {
   display: inline;
   box-sizing: border-box;
+  overflow-x: scroll;
 }
 
 .hover\:text-gray-900:hover {

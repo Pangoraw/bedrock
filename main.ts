@@ -3,6 +3,7 @@ import {
   dirname,
   join,
   relative,
+  normalize,
 } from "https://deno.land/std@0.165.0/path/posix.ts";
 import {
   copy,
@@ -12,6 +13,7 @@ import {
   walk,
 } from "https://deno.land/std@0.165.0/fs/mod.ts";
 import { rmdir } from "https://deno.land/std@0.165.0/node/fs/promises.ts";
+import ProgressBar from "https://deno.land/x/progress@v1.3.4/mod.ts";
 
 import { Vault } from "./Vault.ts";
 import { render, renderIndexPage } from "./template.tsx";
@@ -26,12 +28,24 @@ if (!["serve", "export"].includes(cmd)) {
   throw new Error(`invalid command '${cmd}'`);
 }
 
-const vault = new Vault("/home/pberg/notes-obelix");
+if (Deno.args.length < 3) {
+  throw new Error("unspecified vault path");
+}
+const vaultPath = normalize(Deno.args[2]);
+console.log(`Loading vault at '${vaultPath}'`);
+
+const vault = new Vault(vaultPath);
 console.log("Found", vault.notes.length, "notes");
 
 await generateCss();
 
 const exportVault = async (dest: string) => {
+  const total = vault.notes.length + 2;
+  const progress = new ProgressBar({
+    title: "Export",
+    total,
+  });
+  let completed = 0;
   if (await exists(dest)) {
     console.log(`Removing ${dest}...`);
     await rmdir(dest, {
@@ -41,12 +55,15 @@ const exportVault = async (dest: string) => {
   await ensureDir(dest);
 
   await copy("./style.css", join(dest, "style.css"));
+  progress.render(completed++);
+
   const indexFile = join(dest, "index.html");
   await ensureFile(indexFile);
   await Deno.writeTextFile(indexFile, renderIndexPage(vault));
+  progress.render(completed++);
 
   for await (const entry of walk(vault.path, {
-    skip: [/.git/, /.obsidian/],
+    skip: [/.git.*/, /.obsidian/],
   })) {
     const relPath = relative(vault.path, entry.path);
     const targetPath = join(dest, relPath);
@@ -70,11 +87,14 @@ const exportVault = async (dest: string) => {
         const targetHtmlFile = targetPath.replace(".md", ".html");
         await ensureFile(targetHtmlFile);
         await Deno.writeTextFile(targetHtmlFile, htmlContent);
+
+        progress.render(completed++);
       } else if (entry.name !== ".gitignore") {
         await copy(entry.path, targetPath, { overwrite: true });
       }
     }
   }
+  progress.render(total);
 };
 
 const httpServer = async () => {
@@ -137,7 +157,7 @@ const httpServer = async () => {
 
 switch (cmd) {
   case "export": {
-    const dest = Deno.args.length >= 3 ? Deno.args[2] : "./public";
+    const dest = Deno.args.length >= 4 ? Deno.args[3] : "./public";
     await exportVault(dest);
     break;
   }

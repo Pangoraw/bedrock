@@ -13,6 +13,7 @@ import tag_plugin from "./tag.ts";
 import callout_box from "./callout_box.ts";
 import { walkSync } from "https://deno.land/std@0.165.0/fs/walk.ts";
 import { existsSync } from "https://deno.land/std@0.165.0/node/fs.ts";
+import { highlightCode } from "./highlight.ts";
 
 export class Vault {
   notes: Array<Note> = [];
@@ -36,6 +37,7 @@ export class Vault {
     this.renderer = new MarkdownIt({
       linkify: true,
       breaks: true,
+      highlight: highlightCode,
     })
       .enable("linkify")
       // .use(katex)

@@ -44,6 +44,10 @@ const template = (name: string, content: string) => {
       <head>
         {/* <link rel="stylesheet" href="/index.css" /> */}
         <link rel="stylesheet" href="/style.css" />
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/github-dark-dimmed.min.css"
+        />
         <meta charSet="utf-8"></meta>
         <title>{name}</title>
       </head>
