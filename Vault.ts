@@ -1,18 +1,19 @@
-import MarkdownIt from "npm:markdown-it";
 import {
   dirname,
   join,
   parse,
   relative,
 } from "https://deno.land/std@0.165.0/path/posix.ts";
+import { walkSync } from "https://deno.land/std@0.165.0/fs/walk.ts";
+import { existsSync } from "https://deno.land/std@0.165.0/node/fs.ts";
 
+import MarkdownIt from "npm:markdown-it";
 import task_list from "npm:markdown-it-task-lists";
 import mathjax from "npm:markdown-it-mathjax3";
+
 import double_link from "./double_link.ts";
 import tag_plugin from "./tag.ts";
 import callout_box from "./callout_box.ts";
-import { walkSync } from "https://deno.land/std@0.165.0/fs/walk.ts";
-import { existsSync } from "https://deno.land/std@0.165.0/node/fs.ts";
 import { highlightCode } from "./highlight.ts";
 
 export class Vault {
