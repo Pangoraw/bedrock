@@ -1027,12 +1027,12 @@ video {
   display: flex;
 }
 
-.max-w-sm {
-  max-width: 24rem;
-}
-
 .max-w-none {
   max-width: none;
+}
+
+.max-w-sm {
+  max-width: 24rem;
 }
 
 .overflow-x-clip {
@@ -1043,9 +1043,9 @@ video {
   border-bottom-width: 1px;
 }
 
-.border-gray-600 {
+.border-zinc-200 {
   --tw-border-opacity: 1;
-  border-color: rgb(75 85 99 / var(--tw-border-opacity));
+  border-color: rgb(228 228 231 / var(--tw-border-opacity));
 }
 
 .py-2 {

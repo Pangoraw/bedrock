@@ -54,8 +54,10 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
           state.posMax = labelEnd;
           token = state.push("image_open", "img", 1);
 
+          const imgSrc = state.env.findAsset(label);
+
           // const imgPath = state.src.slice(labelStart, labelEnd);
-          token.attrs = [["src", label]];
+          token.attrs = [["src", imgSrc]];
 
           token = state.push("image_close", "img", -1);
         } else {
@@ -65,7 +67,7 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
           if (note === undefined) {
             path = label;
           } else {
-            path = note.path.replace(".md", "");
+            path = note.path.replace(".md", ".html");
           }
           state.pos = labelStart;
           state.posMax = labelEnd;

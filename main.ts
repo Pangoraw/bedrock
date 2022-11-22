@@ -1,17 +1,21 @@
 import { serve } from "https://deno.land/std@0.165.0/http/server.ts";
-import { join } from "https://deno.land/std@0.165.0/path/posix.ts";
+import {
+  dirname,
+  join,
+  relative,
+} from "https://deno.land/std@0.165.0/path/posix.ts";
 import {
   copy,
   ensureDir,
+  ensureFile,
   exists,
   walk,
 } from "https://deno.land/std@0.165.0/fs/mod.ts";
 import { rmdir } from "https://deno.land/std@0.165.0/node/fs/promises.ts";
 
 import { Vault } from "./Vault.ts";
-import { render } from "./template.tsx";
+import { render, renderIndexPage } from "./template.tsx";
 import { generateCss } from "./tailwind.ts";
-import { relative } from "https://deno.land/std@0.165.0/path/win32.ts";
 
 let cmd = "serve";
 if (Deno.args.length >= 2) {
@@ -22,40 +26,52 @@ if (!["serve", "export"].includes(cmd)) {
   throw new Error(`invalid command '${cmd}'`);
 }
 
-const vault = new Vault("/home/paul/notes");
+const vault = new Vault("/home/pberg/notes-obelix");
 console.log("Found", vault.notes.length, "notes");
 
 await generateCss();
 
 const exportVault = async (dest: string) => {
   if (await exists(dest)) {
+    console.log(`Removing ${dest}...`);
     await rmdir(dest, {
       recursive: true,
     });
   }
   await ensureDir(dest);
 
-  for await (const entry of walk(vault.path)) {
-    const relPath = relative(vault.path + "/", entry.path);
+  await copy("./style.css", join(dest, "style.css"));
+  const indexFile = join(dest, "index.html");
+  await ensureFile(indexFile);
+  await Deno.writeTextFile(indexFile, renderIndexPage(vault));
+
+  for await (const entry of walk(vault.path, {
+    skip: [/.git/, /.obsidian/],
+  })) {
+    const relPath = relative(vault.path, entry.path);
     const targetPath = join(dest, relPath);
 
     if (entry.isDirectory) {
-      await ensureDir(relPath);
-    } else {
+      await ensureDir(targetPath);
+    } else if (entry.isFile) {
+      const containingDir = dirname(entry.path);
+      if (!(await exists(containingDir))) await ensureDir(containingDir);
+
       if (entry.name.endsWith(".md")) {
         const note = vault.findNoteByPath("/" + relPath);
         if (note === undefined) {
           throw new Error(`could not find note ${entry.name} at ${relPath}`);
-          continue;
         }
         const htmlContent = render(
           entry.name.replace(".md", ""),
           note.render()
         );
 
-        await Deno.writeTextFile(targetPath, htmlContent);
-      } else {
-        await copy(entry.path, targetPath);
+        const targetHtmlFile = targetPath.replace(".md", ".html");
+        await ensureFile(targetHtmlFile);
+        await Deno.writeTextFile(targetHtmlFile, htmlContent);
+      } else if (entry.name !== ".gitignore") {
+        await copy(entry.path, targetPath, { overwrite: true });
       }
     }
   }
@@ -97,16 +113,8 @@ const httpServer = async () => {
     }
 
     if (path === "/") {
-      let content = "<ul>";
-      for (const note of vault.notes) {
-        content += `\n<li><a href="${note.path}">${note.path.replace(
-          ".md",
-          ""
-        )}</a></li>`;
-      }
-      content += "</ul>";
-
-      return new Response(render("index", content), {
+      const content = renderIndexPage(vault);
+      return new Response(content, {
         status: 200,
         headers: { "content-type": "text/html; charset=utf-8" },
       });

@@ -1,5 +1,6 @@
 import MarkdownIt from "npm:markdown-it";
 import {
+  dirname,
   join,
   parse,
   relative,
@@ -11,16 +12,20 @@ import double_link from "./double_link.ts";
 import tag_plugin from "./tag.ts";
 import callout_box from "./callout_box.ts";
 import { walkSync } from "https://deno.land/std@0.165.0/fs/walk.ts";
+import { exists } from "https://deno.land/std@0.165.0/fs/exists.ts";
+import { existsSync } from "https://deno.land/std@0.165.0/node/fs.ts";
 
 export class Vault {
   notes: Array<Note> = [];
   path: string;
+  assetPath: string;
   files: Array<string>;
   renderer: MarkdownIt;
   tags: Record<string, Set<Note>> = {};
 
   constructor(path: string) {
     this.path = path;
+    this.assetPath = "Images";
 
     this.files = [];
     this.exploreDir("/");
@@ -79,6 +84,8 @@ export class Vault {
     return this.notes.find((note) => note.path == path);
   }
 
+  findAssetByName() {}
+
   addTagRef(tag: string, note: Note) {
     if (tag in this.tags) {
       this.tags[tag].add(note);
@@ -110,10 +117,14 @@ export class Note {
   backlinks: Array<Note> = [];
 
   render(): string {
-    const fileContent = Deno.readTextFileSync(join(this.vault.path, this.path));
+    const fileContent = Deno.readTextFileSync(this.absPath());
     const env = new ParseEnv(this, this.vault);
     const output = this.vault.renderer.render(fileContent, env);
     return output;
+  }
+
+  absPath(): string {
+    return join(this.vault.path, this.path);
   }
 
   name(): string {
@@ -132,6 +143,23 @@ export class ParseEnv {
   addTag(tag: string) {
     this.currentNote.tags.push(tag);
     this.vault.addTagRef(tag, this.currentNote);
+  }
+
+  findAsset(name: string): string {
+    const noteDir = dirname(this.currentNote.absPath());
+    const absPath = join(noteDir, name);
+
+    if (existsSync(absPath)) {
+      return "/" + relative(this.vault.path, absPath);
+    }
+
+    const assetPath = join(this.vault.path, this.vault.assetPath, name);
+    if (existsSync(assetPath)) {
+      return "/" + relative(this.vault.path, assetPath);
+    }
+    console.log(assetPath, absPath);
+
+    return name;
   }
 
   addReference(note: Note) {
