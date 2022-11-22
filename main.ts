@@ -13,33 +13,14 @@ import {
   walk,
 } from "https://deno.land/std@0.165.0/fs/mod.ts";
 import { rmdir } from "https://deno.land/std@0.165.0/node/fs/promises.ts";
+import * as flags from "https://deno.land/std@0.165.0/flags/mod.ts";
 import ProgressBar from "https://deno.land/x/progress@v1.3.4/mod.ts";
 
 import { Vault } from "./Vault.ts";
-import { render, renderIndexPage } from "./template.tsx";
+import { render, renderIndexPage, renderNotesList } from "./template.tsx";
 import { generateCss } from "./tailwind.ts";
 
-let cmd = "serve";
-if (Deno.args.length >= 2) {
-  cmd = Deno.args[1];
-}
-
-if (!["serve", "export"].includes(cmd)) {
-  throw new Error(`invalid command '${cmd}'`);
-}
-
-if (Deno.args.length < 3) {
-  throw new Error("unspecified vault path");
-}
-const vaultPath = normalize(Deno.args[2]);
-console.log(`Loading vault at '${vaultPath}'`);
-
-const vault = new Vault(vaultPath);
-console.log("Found", vault.notes.length, "notes");
-
-await generateCss();
-
-const exportVault = async (dest: string) => {
+const exportVault = async (vault: Vault, dest: string) => {
   const total = vault.notes.length + 2;
   const progress = new ProgressBar({
     title: "Export",
@@ -94,10 +75,21 @@ const exportVault = async (dest: string) => {
       }
     }
   }
+
+  const tagsDir = join(dest, "tags");
+  await ensureDir(dest);
+  for (const [tag, notes] of Object.entries(vault.tags)) {
+    const tagDir = join(tagsDir, tag);
+    await ensureDir(tagDir);
+    const tagFile = join(tagDir, "index.html");
+    await ensureFile(tagFile);
+    await Deno.writeTextFile(tagFile, renderNotesList([...notes]));
+  }
+
   progress.render(total);
 };
 
-const httpServer = async () => {
+const httpServer = async (vault: Vault) => {
   const isResourceFilePath = (path: string): boolean => {
     const extensions = [".pdf", ".png", ".jpeg", ".jpg"];
     return extensions.find((ext) => path.endsWith(ext)) !== undefined;
@@ -155,13 +147,43 @@ const httpServer = async () => {
   await serve(handler, { port: 8080 });
 };
 
+// Start of main code
+
+let cmd = "serve";
+if (Deno.args.length >= 2) {
+  cmd = Deno.args[1];
+}
+
+if (!["serve", "export"].includes(cmd)) {
+  throw new Error(`invalid command '${cmd}'`);
+}
+
+if (Deno.args.length < 3) {
+  throw new Error("unspecified vault path");
+}
+
+const options = flags.parse(Deno.args.slice(3), {
+  string: ["output"],
+  negatable: ["css"],
+});
+
+const vaultPath = normalize(Deno.args[2]);
+console.log(`Loading vault at '${vaultPath}'`);
+
+const vault = new Vault(vaultPath);
+console.log("Found", vault.notes.length, "notes");
+
+if (options.css) {
+  await generateCss();
+}
+
 switch (cmd) {
   case "export": {
-    const dest = Deno.args.length >= 4 ? Deno.args[3] : "./public";
-    await exportVault(dest);
+    const dest = options.output ?? "./public";
+    await exportVault(vault, dest);
     break;
   }
   case "serve":
-    await httpServer();
+    await httpServer(vault);
     break;
 }

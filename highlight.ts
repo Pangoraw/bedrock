@@ -6,6 +6,7 @@ import julia from "https://unpkg.com/@highlightjs/cdn-assets@11.6.0/es/languages
 import bash from "https://unpkg.com/@highlightjs/cdn-assets@11.6.0/es/languages/bash.min.js";
 import sql from "https://unpkg.com/@highlightjs/cdn-assets@11.6.0/es/languages/sql.min.js";
 import latex from "https://unpkg.com/@highlightjs/cdn-assets@11.6.0/es/languages/latex.min.js";
+import c from "https://unpkg.com/@highlightjs/cdn-assets@11.6.0/es/languages/c.min.js";
 
 hljs.registerLanguage("go", go);
 hljs.registerLanguage("python", python);
@@ -13,9 +14,10 @@ hljs.registerLanguage("julia", julia);
 hljs.registerLanguage("bash", bash);
 hljs.registerLanguage("sql", sql);
 hljs.registerLanguage("latex", latex);
+hljs.registerLanguage("c", c);
 
-const isLanguageAvailable = (lang: string): boolean => {
-  return !!hljs.getLanguage(lang);
+const isLanguageAvailable = (language: string): boolean => {
+  return !!hljs.getLanguage(language);
 };
 
 export const highlightCode = (source: string, language?: string): string => {

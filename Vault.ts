@@ -47,23 +47,30 @@ export class Vault {
       .use(tag_plugin)
       .use(callout_box);
 
-    /*
-    const proxy = (tokens, idx, options, env, self) =>
-      self.renderToken(tokens, idx, options);
-    const defaultRenderBlockQuoteOpen =
-      this.renderer.renderer.rules.blockquote_open || proxy;
-    this.renderer.renderer.rules.blockquote_open = (
-
+    this.renderer.renderer.rules.image = (
       tokens: Array<any>,
       idx: number,
-      options: Record<never, never>,
+      options: any,
       env: ParseEnv,
       self: MarkdownIt
-    ) => {
-      const token = tokens[idx]
-      const calloutType = tokens
-      if (calloutType != )
-    }*/
+    ): string => {
+      const token = tokens[idx];
+      const rawSrc: string | null = token.attrGet("src");
+
+      if (rawSrc === null) throw new Error("img with no src attribute");
+
+      const src = decodeURIComponent(rawSrc);
+      if (
+        !src.startsWith("http://") &&
+        !src.startsWith("https://") &&
+        !src.startsWith("/")
+      ) {
+        const newSrc = env.findAsset(src);
+        token.attrSet("src", newSrc);
+      }
+
+      return self.renderToken(tokens, idx, options);
+    };
 
     this.renderer.renderer.rules.callout_title = (
       tokens: Array<any>,
@@ -71,7 +78,7 @@ export class Vault {
       options: Record<never, never>,
       env: ParseEnv,
       self: MarkdownIt
-    ) => {
+    ): string => {
       const token = tokens[idx];
       const type = token.content;
       const typeTitle = type[0].toUpperCase() + type.slice(1);
@@ -88,8 +95,6 @@ export class Vault {
   findNoteByPath(path: string): Note | undefined {
     return this.notes.find((note) => note.path == path);
   }
-
-  findAssetByName() {}
 
   addTagRef(tag: string, note: Note) {
     if (tag in this.tags) {
@@ -162,7 +167,6 @@ export class ParseEnv {
     if (existsSync(assetPath)) {
       return "/" + relative(this.vault.path, assetPath);
     }
-    console.log(assetPath, absPath);
 
     return name;
   }

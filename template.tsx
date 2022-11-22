@@ -6,6 +6,8 @@ import {
 import ReactDOMServer from "https://jspm.dev/react-dom@16.14.0/server";
 import React from "https://jspm.dev/react@16.14.0";
 
+import { Note, Vault } from "./Vault.ts";
+
 const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
   const gen = Deno.readDirSync(path);
   const entries = [];
@@ -42,19 +44,17 @@ const template = (name: string, content: string) => {
   return (
     <html>
       <head>
-        {/* <link rel="stylesheet" href="/index.css" /> */}
         <link rel="stylesheet" href="/style.css" />
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/github-dark-dimmed.min.css"
-        />
         <meta charSet="utf-8"></meta>
         <title>{name}</title>
       </head>
-      <body>
+      <body className="dark:bg-zinc-800">
         <div className="">
           <nav className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl mb-5 py-2 border-b border-zinc-200 flex">
-            <a className="flex hover:text-gray-900 text-gray-800" href="/">
+            <a
+              className="flex hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
+              href="/"
+            >
               Home
             </a>
           </nav>
@@ -64,7 +64,7 @@ const template = (name: string, content: string) => {
               <TreeView path="/home/paul/notes" absPath="/home/paul/notes" />
             </aside> */}
           <article
-            className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl max-w-none prose prose-zinc mb-5"
+            className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl max-w-none prose prose-zinc dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3"
             dangerouslySetInnerHTML={{ __html: content }}
           ></article>
           {/* </main> */}
@@ -74,9 +74,9 @@ const template = (name: string, content: string) => {
   );
 };
 
-export const renderIndexPage = (vault: Vault): string => {
+export const renderNotesList = (notes: Array<Note>): string => {
   let content = "<ul>";
-  for (const note of vault.notes) {
+  for (const note of notes) {
     content += `\n<li><a href="${note.path.replace(
       ".md",
       ".html"
@@ -84,6 +84,10 @@ export const renderIndexPage = (vault: Vault): string => {
   }
   content += "</ul>";
   return ReactDOMServer.renderToString(template("index", content));
+};
+
+export const renderIndexPage = (vault: Vault): string => {
+  return renderNotesList(vault.notes);
 };
 
 export const render = (title: string, content: string): string =>

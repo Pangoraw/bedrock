@@ -52,14 +52,13 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
         if (is_embed) {
           state.pos = labelStart;
           state.posMax = labelEnd;
-          token = state.push("image_open", "img", 1);
 
           const imgSrc = state.env.findAsset(label);
-
-          // const imgPath = state.src.slice(labelStart, labelEnd);
-          token.attrs = [["src", imgSrc]];
-
-          token = state.push("image_close", "img", -1);
+          token = state.push("image", "img", 0);
+          token.attrs = [
+            ["src", imgSrc],
+            ["alt", label],
+          ];
         } else {
           const note = state.env.vault.findNoteByName(label);
 
