@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.165.0/http/server.ts";
+import { serveDir } from "https://deno.land/std@0.165.0/http/file_server.ts";
 import {
   dirname,
   join,
@@ -83,89 +84,41 @@ const exportVault = async (vault: Vault, dest: string) => {
     await ensureFile(tagFile);
     await Deno.writeTextFile(tagFile, renderNotesList([...notes]));
   }
-
-  // progress.render(total);
+  console.log("Done!");
 };
 
-const httpServer = async (vault: Vault) => {
-  const isResourceFilePath = (path: string): boolean => {
-    const extensions = [".pdf", ".png", ".jpeg", ".jpg"];
-    return extensions.find((ext) => path.endsWith(ext)) !== undefined;
-  };
-
-  const handler = async (request: Request) => {
-    let path = decodeURIComponent(
-      request.url.replace("http://localhost:8080", "")
-    );
-
-    if (path === "/index.css" || path === "/style.css") {
-      const css = Deno.readFileSync(`.${path}`);
-      return new Response(css);
+const httpServer = async (dest: string) => {
+  await serve(
+    (req) => {
+      return serveDir(req, { fsRoot: dest });
+    },
+    {
+      port: 8080,
     }
-
-    if (isResourceFilePath(path)) {
-      let absPath = join(vault.path, path);
-      if (!(await exists(absPath))) {
-        const components = path.split("/");
-        absPath = join(
-          vault.path,
-          "papers/Images/",
-          components[components.length - 1]
-        );
-      }
-
-      if (!(await exists(absPath))) {
-        return new Response("not found", { status: 404 });
-      }
-
-      const body = await Deno.readFile(absPath);
-      return new Response(body, { status: 200 });
-    }
-
-    if (path === "/") {
-      const content = renderIndexPage(vault);
-      return new Response(content, {
-        status: 200,
-        headers: { "content-type": "text/html; charset=utf-8" },
-      });
-    }
-
-    if (!path.endsWith(".md")) path = path + ".md";
-
-    const note = vault.findNoteByPath(path);
-    if (note === undefined) return new Response("not found", { status: 404 });
-    const note_content = note.render();
-
-    return new Response(render(note.name(), note_content), {
-      status: 200,
-      headers: { "content-type": "text/html; charset=utf-8" },
-    });
-  };
-
-  await serve(handler, { port: 8080 });
+  );
 };
 
 // Start of main code
 
 let cmd = "serve";
-if (Deno.args.length >= 2) {
-  cmd = Deno.args[1];
+if (Deno.args.length >= 1) {
+  cmd = Deno.args[0];
 }
 
 if (!["serve", "export"].includes(cmd)) {
   throw new Error(`invalid command '${cmd}'`);
 }
 
-if (Deno.args.length < 3) {
+if (Deno.args.length < 2) {
   throw new Error("unspecified vault path");
 }
 
-const options = flags.parse(Deno.args.slice(3), {
+const options = flags.parse(Deno.args.slice(2), {
   string: ["output", "attachment-folder-path"],
   negatable: ["css"],
 });
 
-const vaultPath = normalize(Deno.args[2]);
+const vaultPath = normalize(Deno.args[1]);
 console.log(`Loading vault at '${vaultPath}'`);
 
 const vault = new Vault(vaultPath, options["attachment-folder-path"]);
@@ -175,13 +128,12 @@ if (options.css) {
   await generateCss();
 }
 
+const dest = options.output ?? "./public";
 switch (cmd) {
-  case "export": {
-    const dest = options.output ?? "./public";
+  case "export":
     await exportVault(vault, dest);
     break;
-  }
   case "serve":
-    await httpServer(vault);
+    await Promise.all([exportVault(vault, dest), httpServer(dest)]);
     break;
 }
