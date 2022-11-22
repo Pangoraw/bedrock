@@ -15,19 +15,14 @@ import {
 } from "https://deno.land/std@0.165.0/fs/mod.ts";
 import { rmdir } from "https://deno.land/std@0.165.0/node/fs/promises.ts";
 import * as flags from "https://deno.land/std@0.165.0/flags/mod.ts";
-import ProgressBar from "https://deno.land/x/progress@v1.3.4/mod.ts";
 
 import { Vault } from "./Vault.ts";
 import { render, renderIndexPage, renderNotesList } from "./template.tsx";
 import { generateCss } from "./tailwind.ts";
 
 const exportVault = async (vault: Vault, dest: string) => {
-  // const total = vault.notes.length + 2;
-  // const progress = new ProgressBar({
-  //   title: "Export",
-  //   total,
-  // });
-  let completed = 0;
+  dest = normalize(dest);
+
   if (await exists(dest)) {
     console.log(`Removing ${dest}...`);
     await rmdir(dest, {
@@ -38,18 +33,21 @@ const exportVault = async (vault: Vault, dest: string) => {
 
   const __dirname = dirname(fromFileUrl(import.meta.url));
   await copy(join(__dirname, "style.css"), join(dest, "style.css"));
-  // progress.render(completed++);
 
   const indexFile = join(dest, "index.html");
   await ensureFile(indexFile);
   await Deno.writeTextFile(indexFile, renderIndexPage(vault));
-  // progress.render(completed++);
 
   for await (const entry of walk(vault.path, {
     skip: [/.git.*/, /.obsidian/],
   })) {
     const relPath = relative(vault.path, entry.path);
     const targetPath = join(dest, relPath);
+
+    // Skip files contained in the destination folder itself if it is contained in the vault
+    if (normalize(entry.path).startsWith(dest)) {
+      continue;
+    }
 
     if (entry.isDirectory) {
       await ensureDir(targetPath);
@@ -70,8 +68,6 @@ const exportVault = async (vault: Vault, dest: string) => {
         const targetHtmlFile = targetPath.replace(".md", ".html");
         await ensureFile(targetHtmlFile);
         await Deno.writeTextFile(targetHtmlFile, htmlContent);
-
-        //   progress.render(completed++);
       } else if (entry.name !== ".gitignore") {
         await copy(entry.path, targetPath, { overwrite: true });
       }
