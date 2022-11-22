@@ -4,6 +4,7 @@ import {
   join,
   relative,
   normalize,
+  fromFileUrl,
 } from "https://deno.land/std@0.165.0/path/posix.ts";
 import {
   copy,
@@ -21,11 +22,11 @@ import { render, renderIndexPage, renderNotesList } from "./template.tsx";
 import { generateCss } from "./tailwind.ts";
 
 const exportVault = async (vault: Vault, dest: string) => {
-  const total = vault.notes.length + 2;
-  const progress = new ProgressBar({
-    title: "Export",
-    total,
-  });
+  // const total = vault.notes.length + 2;
+  // const progress = new ProgressBar({
+  //   title: "Export",
+  //   total,
+  // });
   let completed = 0;
   if (await exists(dest)) {
     console.log(`Removing ${dest}...`);
@@ -35,13 +36,14 @@ const exportVault = async (vault: Vault, dest: string) => {
   }
   await ensureDir(dest);
 
-  await copy("./style.css", join(dest, "style.css"));
-  progress.render(completed++);
+  const __dirname = dirname(fromFileUrl(import.meta.url));
+  await copy(join(__dirname, "style.css"), join(dest, "style.css"));
+  // progress.render(completed++);
 
   const indexFile = join(dest, "index.html");
   await ensureFile(indexFile);
   await Deno.writeTextFile(indexFile, renderIndexPage(vault));
-  progress.render(completed++);
+  // progress.render(completed++);
 
   for await (const entry of walk(vault.path, {
     skip: [/.git.*/, /.obsidian/],
@@ -69,7 +71,7 @@ const exportVault = async (vault: Vault, dest: string) => {
         await ensureFile(targetHtmlFile);
         await Deno.writeTextFile(targetHtmlFile, htmlContent);
 
-        progress.render(completed++);
+        //   progress.render(completed++);
       } else if (entry.name !== ".gitignore") {
         await copy(entry.path, targetPath, { overwrite: true });
       }
@@ -86,7 +88,7 @@ const exportVault = async (vault: Vault, dest: string) => {
     await Deno.writeTextFile(tagFile, renderNotesList([...notes]));
   }
 
-  progress.render(total);
+  // progress.render(total);
 };
 
 const httpServer = async (vault: Vault) => {
@@ -163,14 +165,14 @@ if (Deno.args.length < 3) {
 }
 
 const options = flags.parse(Deno.args.slice(3), {
-  string: ["output"],
+  string: ["output", "attachment-folder-path"],
   negatable: ["css"],
 });
 
 const vaultPath = normalize(Deno.args[2]);
 console.log(`Loading vault at '${vaultPath}'`);
 
-const vault = new Vault(vaultPath);
+const vault = new Vault(vaultPath, options["attachment-folder-path"]);
 console.log("Found", vault.notes.length, "notes");
 
 if (options.css) {

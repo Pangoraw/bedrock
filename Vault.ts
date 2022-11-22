@@ -23,13 +23,17 @@ export class Vault {
   renderer: MarkdownIt;
   tags: Record<string, Set<Note>> = {};
 
-  constructor(path: string) {
+  constructor(path: string, attachmentFolderPath?: string) {
     this.path = path;
 
-    const obsConfig = JSON.parse(
-      Deno.readTextFileSync(join(this.path, ".obsidian", "app.json"))
-    );
-    this.assetPath = obsConfig.attachmentFolderPath;
+    if (!attachmentFolderPath) {
+      const obsConfig = JSON.parse(
+        Deno.readTextFileSync(join(this.path, ".obsidian", "app.json"))
+      );
+      this.assetPath = obsConfig.attachmentFolderPath;
+    } else {
+      this.assetPath = attachmentFolderPath;
+    }
 
     this.files = [];
     this.exploreDir("/");
