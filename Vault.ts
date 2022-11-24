@@ -15,6 +15,9 @@ import double_link from "./double_link.ts";
 import tag_plugin from "./tag.ts";
 import callout_box from "./callout_box.ts";
 import { highlightCode } from "./highlight.ts";
+import { Token } from "./ParseState.ts";
+
+type Optional<T> = T | null;
 
 export class Vault {
   notes: Array<Note> = [];
@@ -83,6 +86,28 @@ export class Vault {
       return self.renderToken(tokens, idx, options);
     };
 
+    const proxy = (
+      tokens: Array<Token>,
+      idx: number,
+      options: any,
+      env: ParseEnv,
+      self: MarkdownIt
+    ) => self.renderToken(tokens, idx, options);
+    const headerDefault = this.renderer.renderer.rules.heading_open || proxy;
+    this.renderer.renderer.rules.heading_open = (
+      tokens: Array<Token>,
+      idx: number,
+      options: any,
+      env: ParseEnv,
+      self: MarkdownIt
+    ): string => {
+      const token = tokens[idx];
+      if (token.tag === "h1") {
+        env.hasTitle = true;
+      }
+      return headerDefault(tokens, idx, options, env, self);
+    };
+
     this.renderer.renderer.rules.callout_title = (
       tokens: Array<any>,
       idx: number,
@@ -137,10 +162,40 @@ export class Note {
   tags: Array<string> = [];
   backlinks: Array<Note> = [];
 
+  hasTitle: boolean = false;
+  private cached_content: Optional<string> = null;
+
+  textContent(): string {
+    const fileContent = Deno.readTextFileSync(this.absPath());
+    const env = new ParseEnv(this, this.vault);
+    const tokens: Array<Token> = this.vault.renderer.parse(fileContent, env);
+
+    const content: Array<string> = [];
+    const explore = (token: Token) => {
+      if (token.type === "text") content.push(token.content);
+      else if (Array.isArray(token.children)) {
+        for (const child of token.children) {
+          explore(child);
+        }
+      }
+    };
+
+    for (const token of tokens) {
+      explore(token);
+    }
+
+    return content.join("\n");
+  }
+
   render(): string {
+    if (this.cached_content !== null) {
+      return this.cached_content;
+    }
+
     const fileContent = Deno.readTextFileSync(this.absPath());
     const env = new ParseEnv(this, this.vault);
     const output = this.vault.renderer.render(fileContent, env);
+    this.hasTitle = env.hasTitle;
     return output;
   }
 
@@ -149,7 +204,7 @@ export class Note {
   }
 
   url(): string {
-    return join("/", this.vault.rootUrl, this.path);
+    return join("/", this.vault.rootUrl, this.path.replace(".md", ".html"));
   }
 
   name(): string {
@@ -163,6 +218,8 @@ export class Note {
 }
 
 export class ParseEnv {
+  hasTitle: boolean = false;
+
   constructor(private currentNote: Note, public vault: Vault) {}
 
   addTag(tag: string) {
@@ -175,13 +232,15 @@ export class ParseEnv {
     const absPath = join(noteDir, name);
 
     if (existsSync(absPath)) {
-      return "/" + join(this.vault.rootUrl, relative(this.vault.path, absPath));
+      return join("/", this.vault.rootUrl, relative(this.vault.path, absPath));
     }
 
     const assetPath = join(this.vault.path, this.vault.assetPath, name);
     if (existsSync(assetPath)) {
-      return (
-        "/" + join(this.vault.rootUrl, relative(this.vault.path, assetPath))
+      return join(
+        "/",
+        this.vault.rootUrl,
+        relative(this.vault.path, assetPath)
       );
     }
 

@@ -1,7 +1,31 @@
 export type MarkdownIt = any;
-export type Token = any;
+
+type AttrPair = [string, string];
+
+export type Token<Meta = any> = {
+  attrGet: (name: string) => string | null;
+  attrIndex: (name: string) => number | null;
+  attrJoin: (name: string, value: string) => void;
+  attrPush: (pair: AttrPair) => void;
+  attrSet: (name: string, string: string) => void;
+
+  attrs: Array<AttrPair>;
+  block: boolean;
+  children: Array<Token>;
+  content: string;
+  hidden: boolean;
+  info: string;
+  level: number;
+  map: [number, number];
+  markup: string;
+  meta: Meta;
+  nesting: number;
+  tag: string;
+  type: string;
+};
 
 export interface ParseBlockState<E = Record<never, never>> {
+  tokens: Array<Token>;
   src: string;
   md: MarkdownIt;
 
@@ -30,6 +54,7 @@ export interface ParseBlockState<E = Record<never, never>> {
 }
 
 export interface ParseInlineState<E = Record<never, never>> {
+  tokens: Array<Token>;
   src: string;
   md: MarkdownIt;
   pos: number;

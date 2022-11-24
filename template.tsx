@@ -40,11 +40,16 @@ const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
   );
 };
 
-const template = (name: string, content: string, rootUrl: string = "/") => {
+const template = (
+  name: string,
+  content: string,
+  rootUrl = "/",
+  addTitle = false
+) => {
   return (
     <html>
       <head>
-        <link rel="stylesheet" href={"/" + join(rootUrl, "style.css")} />
+        <link rel="stylesheet" href={join("/", rootUrl, "style.css")} />
         <meta charSet="utf-8"></meta>
         <title>{name}</title>
       </head>
@@ -53,7 +58,7 @@ const template = (name: string, content: string, rootUrl: string = "/") => {
           <nav className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl mb-5 py-2 border-b border-zinc-200 flex">
             <a
               className="flex hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
-              href={"/" + rootUrl}
+              href={join("/", rootUrl)}
             >
               Home
             </a>
@@ -63,10 +68,10 @@ const template = (name: string, content: string, rootUrl: string = "/") => {
           {/* <aside className="max-w-sm overflow-x-clip">
               <TreeView path="/home/paul/notes" absPath="/home/paul/notes" />
             </aside> */}
-          <article
-            className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl max-w-none prose prose-zinc dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3"
-            dangerouslySetInnerHTML={{ __html: content }}
-          ></article>
+          <article className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl max-w-none prose prose-zinc dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3">
+            {addTitle ? <h1>{name}</h1> : undefined}
+            <div dangerouslySetInnerHTML={{ __html: content }}></div>
+          </article>
           {/* </main> */}
         </div>
       </body>
@@ -75,24 +80,35 @@ const template = (name: string, content: string, rootUrl: string = "/") => {
 };
 
 export const renderNotesList = (
+  title: string,
   notes: Array<Note>,
-  rootUrl: string
+  rootUrl: string,
+  addTitle: boolean
 ): string => {
-  let content = "<ul>";
-  for (const note of notes) {
-    content += `\n<li><a href="${join(
-      "/",
-      rootUrl,
-      note.path.replace(".md", ".html")
-    )}">${note.path.replace(".md", "")}</a></li>`;
-  }
-  content += "</ul>";
-  return ReactDOMServer.renderToString(template("index", content, rootUrl));
+  const list = (
+    <ul>
+      {notes.map((note) => (
+        <li key={note.path}>
+          <a href={note.url()}>{note.path.replace(".md", "")}</a>
+        </li>
+      ))}
+    </ul>
+  );
+  return ReactDOMServer.renderToString(
+    template(title, ReactDOMServer.renderToString(list), rootUrl, addTitle)
+  );
 };
 
 export const renderIndexPage = (vault: Vault): string => {
-  return renderNotesList(vault.notes, vault.rootUrl);
+  return renderNotesList("Vault Home", vault.notes, vault.rootUrl, false);
 };
 
-export const render = (vault: Vault, title: string, content: string): string =>
-  ReactDOMServer.renderToString(template(title, content, vault.rootUrl));
+export const render = (
+  vault: Vault,
+  title: string,
+  content: string,
+  addTitle = false
+): string =>
+  ReactDOMServer.renderToString(
+    template(title, content, vault.rootUrl, addTitle)
+  );

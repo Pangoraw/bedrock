@@ -20,6 +20,7 @@ import * as flags from "https://deno.land/std@0.165.0/flags/mod.ts";
 import { Vault } from "./Vault.ts";
 import { render, renderIndexPage, renderNotesList } from "./template.tsx";
 import { generateCss } from "./tailwind.ts";
+import { buildIndex } from "./search.ts";
 
 const exportVault = async (vault: Vault, dest: string) => {
   dest = normalize(dest);
@@ -38,6 +39,8 @@ const exportVault = async (vault: Vault, dest: string) => {
   const indexFile = join(dest, "index.html");
   await ensureFile(indexFile);
   await Deno.writeTextFile(indexFile, renderIndexPage(vault));
+
+  await buildIndex(vault, join(dest, "lunr_search_index.json"));
 
   for await (const entry of walk(vault.path, {
     skip: [/.git.*/, /.obsidian/],
@@ -61,10 +64,12 @@ const exportVault = async (vault: Vault, dest: string) => {
         if (note === undefined) {
           throw new Error(`could not find note ${entry.name} at ${relPath}`);
         }
+        const renderedContent = note.render();
         const htmlContent = render(
           vault,
           entry.name.replace(".md", ""),
-          note.render()
+          renderedContent,
+          !note.hasTitle
         );
 
         const targetHtmlFile = targetPath.replace(".md", ".html");
@@ -85,7 +90,7 @@ const exportVault = async (vault: Vault, dest: string) => {
     await ensureFile(tagFile);
     await Deno.writeTextFile(
       tagFile,
-      renderNotesList([...notes], vault.rootUrl)
+      renderNotesList(`#${tag}`, [...notes], vault.rootUrl, true)
     );
   }
   console.log("Done!");

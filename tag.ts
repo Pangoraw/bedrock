@@ -33,6 +33,10 @@ export default function tag_plugin(md: MarkdownIt, _opts: any) {
       }
       const wordEnd = pos;
 
+      if (wordStart === wordEnd || pos === max) {
+        return false;
+      }
+
       let token;
 
       if (!silent) {

@@ -53,12 +53,21 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
           state.pos = labelStart;
           state.posMax = labelEnd;
 
-          const imgSrc = state.env.findAsset(label);
-          token = state.push("image", "img", 0);
-          token.attrs = [
-            ["src", imgSrc],
-            ["alt", label],
-          ];
+          const maybeNote = state.env.vault.findNoteByName(label);
+
+          if (maybeNote === undefined) {
+            const imgSrc = state.env.findAsset(label);
+            token = state.push("image", "img", 0);
+            token.attrs = [
+              ["src", imgSrc],
+              ["alt", label],
+            ];
+          } else {
+            const tokens = maybeNote.renderTokens();
+            for (const token of tokens) {
+              state.tokens.push(token);
+            }
+          }
         } else {
           const note = state.env.vault.findNoteByName(label);
 
