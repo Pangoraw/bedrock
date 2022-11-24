@@ -18,12 +18,18 @@ import { rmdir } from "https://deno.land/std@0.165.0/node/fs/promises.ts";
 import * as flags from "https://deno.land/std@0.165.0/flags/mod.ts";
 
 import { Vault } from "./Vault.ts";
-import { render, renderIndexPage, renderNotesList } from "./template.tsx";
+import {
+  render,
+  renderIndexPage,
+  renderNotesList,
+  searchPage,
+} from "./template.tsx";
 import { generateCss } from "./tailwind.ts";
 import { buildIndex } from "./search.ts";
 
 const exportVault = async (vault: Vault, dest: string) => {
   dest = normalize(dest);
+  const miscPath = join(dest, "obsidian");
 
   if (await exists(dest)) {
     console.log(`Removing ${dest}...`);
@@ -39,8 +45,6 @@ const exportVault = async (vault: Vault, dest: string) => {
   const indexFile = join(dest, "index.html");
   await ensureFile(indexFile);
   await Deno.writeTextFile(indexFile, renderIndexPage(vault));
-
-  await buildIndex(vault, join(dest, "lunr_search_index.json"));
 
   for await (const entry of walk(vault.path, {
     skip: [/.git.*/, /.obsidian/],
@@ -81,8 +85,8 @@ const exportVault = async (vault: Vault, dest: string) => {
     }
   }
 
-  const tagsDir = join(dest, "tags");
-  await ensureDir(dest);
+  const tagsDir = join(miscPath, "tags");
+  await ensureDir(miscPath);
   for (const [tag, notes] of Object.entries(vault.tags)) {
     const tagDir = join(tagsDir, tag);
     await ensureDir(tagDir);
@@ -93,6 +97,16 @@ const exportVault = async (vault: Vault, dest: string) => {
       renderNotesList(`#${tag}`, [...notes], vault.rootUrl, true)
     );
   }
+
+  const searchDir = join(miscPath, "search");
+  await ensureDir(searchDir);
+  await buildIndex(vault, join(searchDir, "lunr_search_index.json"));
+  await copy(join(__dirname, "search.js"), join(searchDir, "search.js"));
+  await Deno.writeTextFile(
+    join(searchDir, "index.html"),
+    searchPage(vault.rootUrl)
+  );
+
   console.log("Done!");
 };
 
@@ -116,18 +130,25 @@ if (Deno.args.length >= 1) {
   cmd = Deno.args[0];
 }
 
-if (!["serve", "export"].includes(cmd)) {
-  throw new Error(`invalid command '${cmd}'`);
-}
+const COMMANDS = ["serve", "export", "generate-css"];
 
-if (Deno.args.length < 2) {
-  throw new Error("unspecified vault path");
+if (!COMMANDS.includes(cmd)) {
+  throw new Error(`invalid command '${cmd}'`);
 }
 
 const options = flags.parse(Deno.args.slice(2), {
   string: ["output", "attachment-folder-path", "root-url"],
   negatable: ["css"],
 });
+
+if (cmd === "generate-css" || options.css) {
+  await generateCss();
+  options.css || Deno.exit(0);
+}
+
+if (Deno.args.length < 2) {
+  throw new Error("unspecified vault path");
+}
 
 const vaultPath = normalize(Deno.args[1]);
 console.log(`Loading vault at '${vaultPath}'`);
@@ -138,10 +159,6 @@ const vault = new Vault(
   options["root-url"]
 );
 console.log("Found", vault.notes.length, "notes");
-
-if (options.css) {
-  await generateCss();
-}
 
 const dest = options.output ?? "./public";
 switch (cmd) {

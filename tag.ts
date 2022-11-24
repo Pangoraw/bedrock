@@ -30,7 +30,7 @@ export default function tag_plugin(md: MarkdownIt, _opts: any) {
 
       const wordStart = pos;
       let allNumeric = true;
-      for (; pos < max; pos++) {
+      for (; pos <= max; pos++) {
         const code = state.src.charCodeAt(pos);
         if (!isAlpha(code) && !isNumeric(code)) {
           break;
@@ -39,7 +39,8 @@ export default function tag_plugin(md: MarkdownIt, _opts: any) {
       }
       const wordEnd = pos;
 
-      if (wordStart === wordEnd || pos === max || allNumeric) {
+      console.log(state.src.slice(wordStart, wordEnd), pos, max, wordStart, wordEnd, allNumeric)
+      if (wordStart === wordEnd || pos > max || allNumeric) {
         return false;
       }
 
@@ -53,7 +54,10 @@ export default function tag_plugin(md: MarkdownIt, _opts: any) {
 
         const tagWord = state.src.slice(wordStart, wordEnd);
         token.attrs = [
-          ["href", join("/", state.env.vault.rootUrl, "/tags/", tagWord)],
+          [
+            "href",
+            join("/", state.env.vault.rootUrl, "obsidian", "tags", tagWord),
+          ],
           ["class", "tag"],
         ];
 

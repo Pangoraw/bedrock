@@ -51,6 +51,7 @@ const template = (
       <head>
         <link rel="stylesheet" href={join("/", rootUrl, "style.css")} />
         <meta charSet="utf-8"></meta>
+        <link rel="shortcut icon" href={join("/", rootUrl, "favicon.ico")} />
         <title>{name}</title>
       </head>
       <body className="dark:bg-zinc-800">
@@ -61,6 +62,12 @@ const template = (
               href={join("/", rootUrl)}
             >
               Home
+            </a>
+            <a
+              className="ml-4 flex hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
+              href={join("/", rootUrl, "obsidian", "search")}
+            >
+              Search
             </a>
           </nav>
 
@@ -76,6 +83,28 @@ const template = (
         </div>
       </body>
     </html>
+  );
+};
+
+export const searchPage = (rootUrl: string) => {
+  const content = (
+    <>
+      <input
+        className="mt-1 px-2 block w-full not-prose rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        type="text"
+        autoFocus
+        placeholder="Search..."
+      />
+
+      <ul className="results-area"></ul>
+
+      <script src="https://unpkg.com/lunr/lunr.js"></script>
+      <script src={join("/", rootUrl, "obsidian", "search", "search.js")} />
+    </>
+  );
+
+  return ReactDOMServer.renderToString(
+    template("Search", ReactDOMServer.renderToString(content), rootUrl, true)
   );
 };
 
