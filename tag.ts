@@ -3,7 +3,11 @@ import { join } from "https://deno.land/std@0.165.0/path/win32.ts";
 import { MarkdownIt, ParseInlineState } from "./ParseState.ts";
 import { ParseEnv } from "./Vault.ts";
 
-function isAlphanumeric(code: number): boolean {
+function isNumeric(code: number): boolean {
+  return code >= 0x30 /* 0 */ && code <= 0x39 /* 9 */;
+}
+
+function isAlpha(code: number): boolean {
   return (
     (code >= 0x61 /* a */ && code <= 0x7a) /* z */ ||
     (code >= 0x41 /* A */ && code <= 0x5a) /* Z */
@@ -25,15 +29,17 @@ export default function tag_plugin(md: MarkdownIt, _opts: any) {
       pos++;
 
       const wordStart = pos;
+      let allNumeric = true;
       for (; pos < max; pos++) {
         const code = state.src.charCodeAt(pos);
-        if (!isAlphanumeric(code)) {
+        if (!isAlpha(code) && !isNumeric(code)) {
           break;
         }
+        allNumeric = allNumeric && isNumeric(code);
       }
       const wordEnd = pos;
 
-      if (wordStart === wordEnd || pos === max) {
+      if (wordStart === wordEnd || pos === max || allNumeric) {
         return false;
       }
 
