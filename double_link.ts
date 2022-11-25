@@ -1,4 +1,4 @@
-import { env } from "https://deno.land/std@0.165.0/node/process.ts";
+import { join } from "https://deno.land/std@0.165.0/path/posix.ts";
 import { MarkdownIt, ParseInlineState } from "./ParseState.ts";
 import { ParseEnv } from "./Vault.ts";
 
@@ -70,7 +70,12 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
             }
           }
         } else {
-          const note = state.env.vault.findNoteByName(label);
+          let note = state.env.vault.findNoteByName(label);
+
+          // Try by path instead
+          if (note === undefined) {
+            note = state.env.vault.findNoteByPath(join("/", label) + ".md");
+          }
 
           let path;
           if (note === undefined) {

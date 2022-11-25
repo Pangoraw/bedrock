@@ -109,6 +109,24 @@ export class Vault {
       return headerDefault(tokens, idx, options, env, self);
     };
 
+    const linkDefault = this.renderer.renderer.rules.link_open || proxy;
+    this.renderer.renderer.rules.link_open = (
+      tokens: Array<Token>,
+      idx: number,
+      options: any,
+      env: ParseEnv,
+      self: MarkdownIt
+    ) => {
+      const token = tokens[idx];
+      const href = token.attrGet("href");
+
+      if (href && href.startsWith("http")) {
+        token.attrJoin("target", "_blank");
+      }
+
+      return linkDefault(tokens, idx, options, env, self);
+    };
+
     this.renderer.renderer.rules.callout_title = (
       tokens: Array<any>,
       idx: number,
@@ -163,7 +181,7 @@ export class Note {
   tags: Array<string> = [];
   backlinks: Set<Note> = new Set();
 
-  hasTitle: boolean = false;
+  hasTitle = false;
   private cached_content: Optional<string> = null;
 
   textContent(): string {
