@@ -52,6 +52,7 @@ export class Vault {
       linkify: true,
       breaks: true,
       highlight: highlightCode,
+      html: true,
     })
       .enable("linkify")
       // .use(katex)
