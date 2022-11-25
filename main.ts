@@ -68,12 +68,10 @@ const exportVault = async (vault: Vault, dest: string) => {
         if (note === undefined) {
           throw new Error(`could not find note ${entry.name} at ${relPath}`);
         }
-        const renderedContent = note.render();
         const htmlContent = render(
           vault,
           entry.name.replace(".md", ""),
-          renderedContent,
-          !note.hasTitle
+          note,
         );
 
         const targetHtmlFile = targetPath.replace(".md", ".html");

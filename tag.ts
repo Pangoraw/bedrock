@@ -39,7 +39,6 @@ export default function tag_plugin(md: MarkdownIt, _opts: any) {
       }
       const wordEnd = pos;
 
-      console.log(state.src.slice(wordStart, wordEnd), pos, max, wordStart, wordEnd, allNumeric)
       if (wordStart === wordEnd || pos > max || allNumeric) {
         return false;
       }

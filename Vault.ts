@@ -160,7 +160,7 @@ export class Note {
   path: string; // Path relative the vault's root (vault.path)
   vault: Vault;
   tags: Array<string> = [];
-  backlinks: Array<Note> = [];
+  backlinks: Set<Note> = new Set();
 
   hasTitle: boolean = false;
   private cached_content: Optional<string> = null;
@@ -244,10 +244,10 @@ export class ParseEnv {
       );
     }
 
-    return name;
+    return join("/", this.vault.rootUrl, name);
   }
 
   addReference(note: Note) {
-    this.currentNote.backlinks.push(note);
+    note.backlinks.add(this.currentNote);
   }
 }

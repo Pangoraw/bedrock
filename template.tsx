@@ -40,12 +40,7 @@ const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
   );
 };
 
-const template = (
-  name: string,
-  content: string,
-  rootUrl = "/",
-  addTitle = false
-) => {
+const template = (name: string, content: any, rootUrl = "/") => {
   return (
     <html>
       <head>
@@ -75,10 +70,10 @@ const template = (
           {/* <aside className="max-w-sm overflow-x-clip">
               <TreeView path="/home/paul/notes" absPath="/home/paul/notes" />
             </aside> */}
-          <article className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl max-w-none prose prose-zinc dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3">
-            {addTitle ? <h1>{name}</h1> : undefined}
-            <div dangerouslySetInnerHTML={{ __html: content }}></div>
-          </article>
+
+          <main className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl">
+            {content}
+          </main>
           {/* </main> */}
         </div>
       </body>
@@ -87,7 +82,7 @@ const template = (
 };
 
 export const searchPage = (rootUrl: string) => {
-  const content = (
+  const content = proseStyle(
     <>
       <input
         className="mt-1 px-2 block w-full not-prose rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
@@ -103,10 +98,16 @@ export const searchPage = (rootUrl: string) => {
     </>
   );
 
-  return ReactDOMServer.renderToString(
-    template("Search", ReactDOMServer.renderToString(content), rootUrl, true)
+  return ReactDOMServer.renderToStaticMarkup(
+    template("Search", content, rootUrl)
   );
 };
+
+const proseStyle = (component: any) => (
+  <div className="max-w-none prose prose-zinc dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3">
+    {component}
+  </div>
+);
 
 export const renderNotesList = (
   title: string,
@@ -114,30 +115,51 @@ export const renderNotesList = (
   rootUrl: string,
   addTitle: boolean
 ): string => {
-  const list = (
-    <ul>
-      {notes.map((note) => (
-        <li key={note.path}>
-          <a href={note.url()}>{note.path.replace(".md", "")}</a>
-        </li>
-      ))}
-    </ul>
+  const list = proseStyle(
+    <>
+      {addTitle ? <h1>{title}</h1> : undefined}
+      <ul>
+        {notes.map((note) => (
+          <li key={note.path}>
+            <a href={note.url()}>{note.path.replace(".md", "")}</a>
+          </li>
+        ))}
+      </ul>
+    </>
   );
-  return ReactDOMServer.renderToString(
-    template(title, ReactDOMServer.renderToString(list), rootUrl, addTitle)
-  );
+  return ReactDOMServer.renderToStaticMarkup(template(title, list, rootUrl));
 };
 
 export const renderIndexPage = (vault: Vault): string => {
   return renderNotesList("Vault Home", vault.notes, vault.rootUrl, false);
 };
 
-export const render = (
-  vault: Vault,
-  title: string,
-  content: string,
-  addTitle = false
-): string =>
-  ReactDOMServer.renderToString(
-    template(title, content, vault.rootUrl, addTitle)
+export const render = (vault: Vault, title: string, note: Note): string => {
+  const renderedContent = note.render();
+  const addTitle = !note.hasTitle;
+
+  const backNotes = [...note.backlinks];
+  const content = proseStyle(
+    <>
+      {addTitle ? <h1>{note.name()}</h1> : undefined}
+      <div dangerouslySetInnerHTML={{ __html: renderedContent }}></div>
+
+      {backNotes.length > 0 ? (
+        <>
+          <hr className="my-5" />
+          <h4>Backlinks</h4>
+          <ul>
+            {backNotes.map((backNote) => (
+              <li key={backNote.path}>
+                <a href={backNote.url()}>{backNote.name()}</a>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : undefined}
+    </>
   );
+  return ReactDOMServer.renderToStaticMarkup(
+    template(title, content, vault.rootUrl)
+  );
+};

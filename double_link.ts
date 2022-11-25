@@ -1,3 +1,4 @@
+import { env } from "https://deno.land/std@0.165.0/node/process.ts";
 import { MarkdownIt, ParseInlineState } from "./ParseState.ts";
 import { ParseEnv } from "./Vault.ts";
 
@@ -75,6 +76,7 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
           if (note === undefined) {
             path = label + ".html";
           } else {
+            state.env.addReference(note);
             path = note.url().replace(".md", ".html");
           }
           state.pos = labelStart;
