@@ -1,7 +1,7 @@
 export const generateCss = async () => {
   const status = await Deno.run({
     cmd: [
-      "/home/pberg/.nvm/versions/node/v16.17.0/bin/npx",
+      "npx",
       "tailwindcss",
       "--input",
       "index.css",

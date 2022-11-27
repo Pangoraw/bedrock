@@ -19,6 +19,11 @@ import { Token } from "./ParseState.ts";
 
 type Optional<T> = T | null;
 
+type VaultOptions = {
+  attachmentFolderPath: string | undefined;
+  rootUrl: string | undefined;
+  graphOnEachPage: boolean;
+};
 export class Vault {
   notes: Array<Note> = [];
   path: string;
@@ -27,14 +32,19 @@ export class Vault {
   files: Array<string>;
   renderer: MarkdownIt;
   tags: Record<string, Set<Note>> = {};
+  renderGraphOnEachPage = true;
 
   constructor(
     path: string,
-    attachmentFolderPath?: string,
-    rootUrl: string = "/"
+    { attachmentFolderPath, rootUrl, graphOnEachPage } = {
+      attachmentFolderPath: undefined,
+      rootUrl: undefined,
+      graphOnEachPage: true,
+    }
   ) {
     this.path = path;
-    this.rootUrl = rootUrl;
+    this.rootUrl = rootUrl ?? "/";
+    this.renderGraphOnEachPage = graphOnEachPage;
 
     if (!attachmentFolderPath) {
       const obsConfig = JSON.parse(

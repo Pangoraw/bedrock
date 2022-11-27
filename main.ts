@@ -20,6 +20,7 @@ import * as flags from "https://deno.land/std@0.165.0/flags/mod.ts";
 import { Vault } from "./Vault.ts";
 import {
   render,
+  renderGraphPage,
   renderIndexPage,
   renderNotesList,
   searchPage,
@@ -119,8 +120,11 @@ const exportVault = async (vault: Vault, dest: string) => {
     }))
   );
   const graph = { nodes, links };
-  await Deno.writeTextFile(join(graphDir, "graph.json"), JSON.stringify(graph));
-  await copy(join(__dirname, "graph.html"), join(graphDir, "index.html"));
+  await Promise.all([
+    Deno.writeTextFile(join(graphDir, "graph.json"), JSON.stringify(graph)),
+    Deno.writeTextFile(join(graphDir, "index.html"), renderGraphPage(vault)),
+    copy(join(__dirname, "graph.js"), join(graphDir, "graph.js")),
+  ]);
 
   console.log("Done!");
 };
@@ -154,6 +158,7 @@ if (!COMMANDS.includes(cmd)) {
 const options = flags.parse(Deno.args.slice(2), {
   string: ["output", "attachment-folder-path", "root-url"],
   negatable: ["css"],
+  boolean: ["graph-on-each-page"],
 });
 
 if (cmd === "generate-css" || options.css) {
@@ -168,11 +173,11 @@ if (Deno.args.length < 2) {
 const vaultPath = normalize(Deno.args[1]);
 console.log(`Loading vault at '${vaultPath}'`);
 
-const vault = new Vault(
-  vaultPath,
-  options["attachment-folder-path"],
-  options["root-url"]
-);
+const vault = new Vault(vaultPath, {
+  attachmentFolderPath: options["attachment-folder-path"],
+  rootUrl: options["root-url"],
+  graphOnEachPage: options["graph-on-each-page"],
+});
 console.log("Found", vault.notes.length, "notes");
 
 const dest = options.output ?? "./public";

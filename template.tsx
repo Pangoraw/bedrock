@@ -136,6 +136,29 @@ export const renderIndexPage = (vault: Vault): string => {
   return renderNotesList("Vault Home", vault.notes, vault.rootUrl, false);
 };
 
+export const renderGraphPage = (vault: Vault): string => {
+  const content = (
+    <html>
+      <head>
+        <link rel="stylesheet" href={join("/", vault.rootUrl, "style.css")} />
+        <script src="https://cdn.jsdelivr.net/npm/d3@6"></script>
+        <script src="https://unpkg.com/force-graph"></script>
+      </head>
+      <body className="bg-gray-100">
+        <div id="graph">
+          <script
+            type="module"
+            src={join("/", vault.rootUrl, "obsidian", "graph", "graph.js")}
+          >
+          </script>
+        </div>
+      </body>
+    </html>
+  );
+
+  return ReactDOMServer.renderToStaticMarkup(content);
+};
+
 export const render = (vault: Vault, title: string, note: Note): string => {
   const renderedContent = note.render();
   const addTitle = !note.hasTitle;
@@ -161,21 +184,26 @@ export const render = (vault: Vault, title: string, note: Note): string => {
           </>
         )
         : undefined}
-
-      <hr />
-      <h4>Graph view</h4>
-      <iframe
-        src={join(
-          "/",
-          vault.rootUrl,
-          "obsidian",
-          "graph",
-          `?name=${encodeURIComponent(note.name())}`,
-        )}
-        frameBorder="0"
-        className="w-full rounded-sm border"
-      >
-      </iframe>
+      {vault.renderGraphOnEachPage
+        ? (
+          <>
+            <hr />
+            <h4>Graph view</h4>
+            <iframe
+              src={join(
+                "/",
+                vault.rootUrl,
+                "obsidian",
+                "graph",
+                `?name=${encodeURIComponent(note.name())}`,
+              )}
+              frameBorder="0"
+              className="w-full rounded-sm border"
+            >
+            </iframe>
+          </>
+        )
+        : undefined}
     </>,
   );
   return ReactDOMServer.renderToStaticMarkup(
