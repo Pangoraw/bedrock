@@ -19,7 +19,7 @@ const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
       entry.name !== ".obsidian"
     ) {
       entries.push(
-        <TreeView key={entryPath} path={entryPath} absPath={absPath} />
+        <TreeView key={entryPath} path={entryPath} absPath={absPath} />,
       );
     } else if (entry.isFile && entry.name !== ".gitignore") {
       entries.push(
@@ -27,7 +27,7 @@ const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
           <a href={`/${relative(absPath, entryPath)}`}>
             {entry.name.replace(".md", "")}
           </a>
-        </p>
+        </p>,
       );
     }
   }
@@ -67,9 +67,11 @@ const template = (name: string, content: any, rootUrl = "/") => {
           </nav>
 
           {/* <main className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl max-w-none flex"> */}
-          {/* <aside className="max-w-sm overflow-x-clip">
+          {
+            /* <aside className="max-w-sm overflow-x-clip">
               <TreeView path="/home/paul/notes" absPath="/home/paul/notes" />
-            </aside> */}
+            </aside> */
+          }
 
           <main className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl">
             {content}
@@ -85,7 +87,7 @@ export const searchPage = (rootUrl: string) => {
   const content = proseStyle(
     <>
       <input
-        className="mt-1 px-2 block w-full not-prose rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        className="mt-1 px-2 block w-full not-prose rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:text-zinc-100 dark:bg-zinc-800"
         type="text"
         autoFocus
         placeholder="Search..."
@@ -95,16 +97,16 @@ export const searchPage = (rootUrl: string) => {
 
       <script src="https://unpkg.com/lunr/lunr.js"></script>
       <script src={join("/", rootUrl, "obsidian", "search", "search.js")} />
-    </>
+    </>,
   );
 
   return ReactDOMServer.renderToStaticMarkup(
-    template("Search", content, rootUrl)
+    template("Search", content, rootUrl),
   );
 };
 
 const proseStyle = (component: any) => (
-  <div className="max-w-none prose prose-zinc dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3">
+  <div className="max-w-none prose prose-zinc dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3 prose-hr:my-5">
     {component}
   </div>
 );
@@ -113,7 +115,7 @@ export const renderNotesList = (
   title: string,
   notes: Array<Note>,
   rootUrl: string,
-  addTitle: boolean
+  addTitle: boolean,
 ): string => {
   const list = proseStyle(
     <>
@@ -125,7 +127,7 @@ export const renderNotesList = (
           </li>
         ))}
       </ul>
-    </>
+    </>,
   );
   return ReactDOMServer.renderToStaticMarkup(template(title, list, rootUrl));
 };
@@ -144,22 +146,39 @@ export const render = (vault: Vault, title: string, note: Note): string => {
       {addTitle ? <h1>{note.name()}</h1> : undefined}
       <div dangerouslySetInnerHTML={{ __html: renderedContent }}></div>
 
-      {backNotes.length > 0 ? (
-        <>
-          <hr className="my-5" />
-          <h4>Backlinks</h4>
-          <ul>
-            {backNotes.map((backNote) => (
-              <li key={backNote.path}>
-                <a href={backNote.url()}>{backNote.name()}</a>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : undefined}
-    </>
+      {backNotes.length > 0
+        ? (
+          <>
+            <hr />
+            <h4>Backlinks</h4>
+            <ul>
+              {backNotes.map((backNote) => (
+                <li key={backNote.path}>
+                  <a href={backNote.url()}>{backNote.name()}</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+        : undefined}
+
+      <hr />
+      <h4>Graph view</h4>
+      <iframe
+        src={join(
+          "/",
+          vault.rootUrl,
+          "obsidian",
+          "graph",
+          `?name=${encodeURIComponent(note.name())}`,
+        )}
+        frameBorder="0"
+        className="w-full rounded-sm border"
+      >
+      </iframe>
+    </>,
   );
   return ReactDOMServer.renderToStaticMarkup(
-    template(title, content, vault.rootUrl)
+    template(title, content, vault.rootUrl),
   );
 };

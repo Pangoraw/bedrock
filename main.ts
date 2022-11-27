@@ -68,11 +68,7 @@ const exportVault = async (vault: Vault, dest: string) => {
         if (note === undefined) {
           throw new Error(`could not find note ${entry.name} at ${relPath}`);
         }
-        const htmlContent = render(
-          vault,
-          entry.name.replace(".md", ""),
-          note,
-        );
+        const htmlContent = render(vault, entry.name.replace(".md", ""), note);
 
         const targetHtmlFile = targetPath.replace(".md", ".html");
         await ensureFile(targetHtmlFile);
@@ -104,6 +100,27 @@ const exportVault = async (vault: Vault, dest: string) => {
     join(searchDir, "index.html"),
     searchPage(vault.rootUrl)
   );
+
+  const graphDir = join(miscPath, "graph");
+  await ensureDir(graphDir);
+  const noteIds: Record<string, number> = {};
+  const nodes = vault.notes.map((note, i) => {
+    noteIds[note.absPath()] = i;
+    return {
+      id: i,
+      url: note.url(),
+      name: note.name(),
+    };
+  });
+  const links = vault.notes.flatMap((note) =>
+    [...note.backlinks].map((link) => ({
+      source: noteIds[note.absPath()],
+      target: noteIds[link.absPath()],
+    }))
+  );
+  const graph = { nodes, links };
+  await Deno.writeTextFile(join(graphDir, "graph.json"), JSON.stringify(graph));
+  await copy(join(__dirname, "graph.html"), join(graphDir, "index.html"));
 
   console.log("Done!");
 };
