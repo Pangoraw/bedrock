@@ -158,7 +158,7 @@ if (!COMMANDS.includes(cmd)) {
 const options = flags.parse(Deno.args.slice(2), {
   string: ["output", "attachment-folder-path", "root-url"],
   negatable: ["css"],
-  boolean: ["graph-on-each-page"],
+  boolean: ["no-graph-on-each-page"],
 });
 
 if (cmd === "generate-css" || options.css) {
@@ -176,7 +176,7 @@ console.log(`Loading vault at '${vaultPath}'`);
 const vault = new Vault(vaultPath, {
   attachmentFolderPath: options["attachment-folder-path"],
   rootUrl: options["root-url"],
-  graphOnEachPage: options["graph-on-each-page"],
+  graphOnEachPage: !options["no-graph-on-each-page"],
 });
 console.log("Found", vault.notes.length, "notes");
 

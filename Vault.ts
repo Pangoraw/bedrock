@@ -44,6 +44,8 @@ export class Vault {
   ) {
     this.path = path;
     this.rootUrl = rootUrl ?? "/";
+
+    console.log(graphOnEachPage);
     this.renderGraphOnEachPage = graphOnEachPage;
 
     if (!attachmentFolderPath) {
