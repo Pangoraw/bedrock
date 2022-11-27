@@ -106,7 +106,7 @@ export const searchPage = (rootUrl: string) => {
 };
 
 const proseStyle = (component: any) => (
-  <div className="max-w-none prose prose-zinc dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3 prose-hr:my-5">
+  <div className="max-w-none prose prose-zinc dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3">
     {component}
   </div>
 );

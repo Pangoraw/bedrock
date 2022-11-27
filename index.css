@@ -15,6 +15,10 @@ blockquote.callout-help {
   word-wrap: break-word;
 }
 
+.prose hr {
+  @apply my-5;
+}
+
 .prose ul > li > :last-child,
 .prose ul > li > :first-child,
 .prose ul > li {
