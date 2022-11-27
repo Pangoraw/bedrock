@@ -1,0 +1,16 @@
+image: docker:latest
+
+before_script:
+  - echo "Building docker image"
+build_image:
+  tags:
+    - linux
+    - ci.inria.fr
+    - small
+  script:
+    - docker build -t registry.gitlab.inria.fr/pberg/bedrock .
+    - docker push registry.gitlab.inria.fr/pberg/bedrock
+  rules:
+    # This ensures that only pushes to the default branch will trigger
+    # a pages deploy
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
