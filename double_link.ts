@@ -60,6 +60,7 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
           if (maybeNote === undefined) {
             const imgSrc = state.env.findAsset(label);
             token = state.push("image", "img", 0);
+            token.children = []; // Add empty children list
             token.attrs = [
               ["src", imgSrc],
               ["alt", label],
@@ -80,7 +81,6 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
 
           let path;
           if (note === undefined) {
-            console.log(label);
             path = label + ".html";
           } else {
             state.env.addReference(note);

@@ -73,14 +73,22 @@ export class Vault {
       .use(tag_plugin)
       .use(callout_box);
 
-    const proxy = (
+    type Renderer = (
+      tokens: Array<Token>,
+      index: number,
+      options: any,
+      env: ParseEnv,
+      self: MarkdownIt
+    ) => string;
+
+    const proxy: Renderer = (
       tokens: Array<Token>,
       idx: number,
       options: any,
       env: ParseEnv,
       self: MarkdownIt
     ) => self.renderToken(tokens, idx, options);
-    const imageDefault = this.renderer.renderer.rules.image || proxy;
+    const imageDefault: Renderer = this.renderer.renderer.rules.image || proxy;
     this.renderer.renderer.rules.image = (
       tokens: Array<any>,
       idx: number,
@@ -103,10 +111,11 @@ export class Vault {
         token.attrSet("src", newSrc);
       }
 
-      return imageDefault(tokens, idx, options);
+      return imageDefault(tokens, idx, options, env, self);
     };
 
-    const headerDefault = this.renderer.renderer.rules.heading_open || proxy;
+    const headerDefault: Renderer =
+      this.renderer.renderer.rules.heading_open || proxy;
     this.renderer.renderer.rules.heading_open = (
       tokens: Array<Token>,
       idx: number,
@@ -133,7 +142,8 @@ export class Vault {
       return headerDefault(tokens, idx, options, env, self);
     };
 
-    const linkDefault = this.renderer.renderer.rules.link_open || proxy;
+    const linkDefault: Renderer =
+      this.renderer.renderer.rules.link_open || proxy;
     this.renderer.renderer.rules.link_open = (
       tokens: Array<Token>,
       idx: number,
