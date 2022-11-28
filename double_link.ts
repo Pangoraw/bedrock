@@ -65,6 +65,9 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
               ["src", imgSrc],
               ["alt", label],
             ];
+            if (alias !== undefined) {
+              token.attrPush(["width", alias]);
+            }
           } else {
             const tokens = maybeNote.renderTokens();
             for (const token of tokens) {
