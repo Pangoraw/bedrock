@@ -20,10 +20,25 @@ import { Token } from "./ParseState.ts";
 
 type Optional<T> = T | null;
 
+type Renderer = (
+  tokens: Array<Token>,
+  index: number,
+  options: any,
+  env: ParseEnv,
+  self: MarkdownItType
+) => string;
+type MarkdownItType = {
+  renderer: {
+    rules: Record<string, Renderer | undefined>;
+  };
+
+  renderToken(tokens: Array<Token>, index: number, options: any): string;
+};
 type VaultOptions = {
   attachmentFolderPath: string | undefined;
   rootUrl: string | undefined;
   graphOnEachPage: boolean;
+  title: string | undefined;
 };
 export class Vault {
   notes: Array<Note> = [];
@@ -31,20 +46,26 @@ export class Vault {
   rootUrl: string;
   assetPath: string;
   files: Array<string>;
-  renderer: MarkdownIt;
+  renderer: MarkdownItType;
   tags: Record<string, Set<Note>> = {};
   renderGraphOnEachPage = true;
+  title: string | undefined;
 
   constructor(
     path: string,
-    { attachmentFolderPath, rootUrl, graphOnEachPage }: VaultOptions = {
+    { attachmentFolderPath, rootUrl, graphOnEachPage, title }: VaultOptions = {
       attachmentFolderPath: undefined,
       rootUrl: undefined,
       graphOnEachPage: true,
+      title: undefined,
     }
   ) {
     this.path = path;
-    this.rootUrl = rootUrl ?? "/";
+    this.rootUrl = rootUrl === undefined ? "/" : rootUrl;
+
+    console.log("rootUrl", this.rootUrl);
+    console.log("title", title);
+    this.title = title;
 
     this.renderGraphOnEachPage = graphOnEachPage;
 
@@ -73,20 +94,12 @@ export class Vault {
       .use(tag_plugin)
       .use(callout_box);
 
-    type Renderer = (
-      tokens: Array<Token>,
-      index: number,
-      options: any,
-      env: ParseEnv,
-      self: MarkdownIt
-    ) => string;
-
     const proxy: Renderer = (
       tokens: Array<Token>,
       idx: number,
       options: any,
       env: ParseEnv,
-      self: MarkdownIt
+      self: MarkdownItType
     ) => self.renderToken(tokens, idx, options);
     const imageDefault: Renderer = this.renderer.renderer.rules.image || proxy;
     this.renderer.renderer.rules.image = (
@@ -94,7 +107,7 @@ export class Vault {
       idx: number,
       options: any,
       env: ParseEnv,
-      self: MarkdownIt
+      self: MarkdownItType
     ): string => {
       const token = tokens[idx];
       const rawSrc: string | null = token.attrGet("src");
@@ -121,7 +134,7 @@ export class Vault {
       idx: number,
       options: any,
       env: ParseEnv,
-      self: MarkdownIt
+      self: MarkdownItType
     ): string => {
       const token = tokens[idx];
 
@@ -149,7 +162,7 @@ export class Vault {
       idx: number,
       options: any,
       env: ParseEnv,
-      self: MarkdownIt
+      self: MarkdownItType
     ) => {
       const token = tokens[idx];
       const href = token.attrGet("href");
@@ -166,13 +179,18 @@ export class Vault {
       idx: number,
       options: Record<never, never>,
       env: ParseEnv,
-      self: MarkdownIt
+      self: MarkdownItType
     ): string => {
       const token = tokens[idx];
       const type = token.content;
       const typeTitle = type[0].toUpperCase() + type.slice(1);
       return `<p div="callout-${type}">${typeTitle}</p>`;
     };
+  }
+
+  prettyTitle(title: string): string {
+    if (this.title !== undefined) return `${title}&middot;${this.title}`;
+    return title;
   }
 
   findNoteByName(name: string): Note | undefined {
@@ -277,7 +295,7 @@ export class Note {
 }
 
 export class ParseEnv {
-  hasTitle: boolean = false;
+  hasTitle = false;
 
   constructor(private currentNote: Note, public vault: Vault) {}
 

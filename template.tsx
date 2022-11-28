@@ -19,7 +19,7 @@ const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
       entry.name !== ".obsidian"
     ) {
       entries.push(
-        <TreeView key={entryPath} path={entryPath} absPath={absPath} />,
+        <TreeView key={entryPath} path={entryPath} absPath={absPath} />
       );
     } else if (entry.isFile && entry.name !== ".gitignore") {
       entries.push(
@@ -27,7 +27,7 @@ const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
           <a href={`/${relative(absPath, entryPath)}`}>
             {entry.name.replace(".md", "")}
           </a>
-        </p>,
+        </p>
       );
     }
   }
@@ -39,6 +39,17 @@ const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
     </details>
   );
 };
+
+const prettyTitle = (vault: Vault, title: string) =>
+  vault.title === undefined ? (
+    title
+  ) : title.length === 0 ? (
+    vault.title
+  ) : (
+    <>
+      {title} &middot; {vault.title}
+    </>
+  );
 
 const template = (name: string, content: any, rootUrl = "/") => {
   return (
@@ -68,11 +79,9 @@ const template = (name: string, content: any, rootUrl = "/") => {
           </nav>
 
           {/* <main className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl max-w-none flex"> */}
-          {
-            /* <aside className="max-w-sm overflow-x-clip">
+          {/* <aside className="max-w-sm overflow-x-clip">
               <TreeView path="/home/paul/notes" absPath="/home/paul/notes" />
-            </aside> */
-          }
+            </aside> */}
 
           <main className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl">
             {content}
@@ -84,7 +93,8 @@ const template = (name: string, content: any, rootUrl = "/") => {
   );
 };
 
-export const searchPage = (rootUrl: string) => {
+export const searchPage = (vault: Vault) => {
+  const rootUrl = vault.rootUrl;
   const content = proseStyle(
     <>
       <input
@@ -98,11 +108,11 @@ export const searchPage = (rootUrl: string) => {
 
       <script src="https://unpkg.com/lunr/lunr.js"></script>
       <script src={join("/", rootUrl, "obsidian", "search", "search.js")} />
-    </>,
+    </>
   );
 
   return ReactDOMServer.renderToStaticMarkup(
-    template("Search", content, rootUrl),
+    template(prettyTitle(vault, "Search"), content, rootUrl)
   );
 };
 
@@ -113,10 +123,10 @@ const proseStyle = (component: any) => (
 );
 
 export const renderNotesList = (
+  vault: Vault,
   title: string,
   notes: Array<Note>,
-  rootUrl: string,
-  addTitle: boolean,
+  addTitle: boolean
 ): string => {
   const list = proseStyle(
     <>
@@ -128,13 +138,20 @@ export const renderNotesList = (
           </li>
         ))}
       </ul>
-    </>,
+    </>
   );
-  return ReactDOMServer.renderToStaticMarkup(template(title, list, rootUrl));
+  return ReactDOMServer.renderToStaticMarkup(
+    template(prettyTitle(vault, title), list, vault.rootUrl)
+  );
 };
 
 export const renderIndexPage = (vault: Vault): string => {
-  return renderNotesList("Vault Home", vault.notes, vault.rootUrl, false);
+  return renderNotesList(
+    vault,
+    vault.title === undefined ? "Vault Home" : "",
+    vault.notes,
+    false
+  );
 };
 
 export const renderGraphPage = (vault: Vault): string => {
@@ -152,8 +169,7 @@ export const renderGraphPage = (vault: Vault): string => {
           <script
             type="module"
             src={join("/", vault.rootUrl, "obsidian", "graph", "graph.js")}
-          >
-          </script>
+          ></script>
         </div>
       </body>
     </html>
@@ -172,44 +188,39 @@ export const render = (vault: Vault, title: string, note: Note): string => {
       {addTitle ? <h1>{note.name()}</h1> : undefined}
       <div dangerouslySetInnerHTML={{ __html: renderedContent }}></div>
 
-      {backNotes.length > 0
-        ? (
-          <>
-            <hr />
-            <h4>Backlinks</h4>
-            <ul>
-              {backNotes.map((backNote) => (
-                <li key={backNote.path}>
-                  <a href={backNote.url()}>{backNote.name()}</a>
-                </li>
-              ))}
-            </ul>
-          </>
-        )
-        : undefined}
-      {vault.renderGraphOnEachPage
-        ? (
-          <>
-            <hr />
-            <h4>Graph view</h4>
-            <iframe
-              src={join(
-                "/",
-                vault.rootUrl,
-                "obsidian",
-                "graph",
-                `?name=${encodeURIComponent(note.name())}`,
-              )}
-              frameBorder="0"
-              className="w-full rounded-sm border"
-            >
-            </iframe>
-          </>
-        )
-        : undefined}
-    </>,
+      {backNotes.length > 0 ? (
+        <>
+          <hr />
+          <h4>Backlinks</h4>
+          <ul>
+            {backNotes.map((backNote) => (
+              <li key={backNote.path}>
+                <a href={backNote.url()}>{backNote.name()}</a>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : undefined}
+      {vault.renderGraphOnEachPage ? (
+        <>
+          <hr />
+          <h4>Graph view</h4>
+          <iframe
+            src={join(
+              "/",
+              vault.rootUrl,
+              "obsidian",
+              "graph",
+              `?name=${encodeURIComponent(note.name())}`
+            )}
+            frameBorder="0"
+            className="w-full rounded-sm border"
+          ></iframe>
+        </>
+      ) : undefined}
+    </>
   );
   return ReactDOMServer.renderToStaticMarkup(
-    template(title, content, vault.rootUrl),
+    template(prettyTitle(vault, title), content, vault.rootUrl)
   );
 };

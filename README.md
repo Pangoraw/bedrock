@@ -20,7 +20,7 @@ pages:
     - linux
     - docker
   script:
-    - bedrock export ./ --root-url=$CI_PROJECT_NAME
+    - bedrock export ./ --root-url=$CI_PROJECT_NAME --title=$CI_PROJECT_TITLE
     # Optionally, you can move more things to the public directory:
     # - mv .obsidian/favicon.ico public/
   artifacts:

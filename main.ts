@@ -89,7 +89,7 @@ const exportVault = async (vault: Vault, dest: string) => {
     await ensureFile(tagFile);
     await Deno.writeTextFile(
       tagFile,
-      renderNotesList(`#${tag}`, [...notes], vault.rootUrl, true)
+      renderNotesList(vault, `#${tag}`, [...notes], true)
     );
   }
 
@@ -97,10 +97,7 @@ const exportVault = async (vault: Vault, dest: string) => {
   await ensureDir(searchDir);
   await buildIndex(vault, join(searchDir, "lunr_search_index.json"));
   await copy(join(__dirname, "search.js"), join(searchDir, "search.js"));
-  await Deno.writeTextFile(
-    join(searchDir, "index.html"),
-    searchPage(vault.rootUrl)
-  );
+  await Deno.writeTextFile(join(searchDir, "index.html"), searchPage(vault));
 
   const graphDir = join(miscPath, "graph");
   await ensureDir(graphDir);
@@ -156,7 +153,7 @@ if (!COMMANDS.includes(cmd)) {
 }
 
 const options = flags.parse(Deno.args.slice(2), {
-  string: ["output", "attachment-folder-path", "root-url"],
+  string: ["title", "output", "attachment-folder-path", "root-url"],
   negatable: ["css"],
   boolean: ["no-graph-on-each-page"],
 });
@@ -177,6 +174,7 @@ const vault = new Vault(vaultPath, {
   attachmentFolderPath: options["attachment-folder-path"],
   rootUrl: options["root-url"],
   graphOnEachPage: !options["no-graph-on-each-page"],
+  title: options.title,
 });
 console.log("Found", vault.notes.length, "notes");
 
