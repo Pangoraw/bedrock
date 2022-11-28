@@ -46,6 +46,7 @@ const template = (name: string, content: any, rootUrl = "/") => {
       <head>
         <link rel="stylesheet" href={join("/", rootUrl, "style.css")} />
         <meta charSet="utf-8"></meta>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="shortcut icon" href={join("/", rootUrl, "favicon.ico")} />
         <title>{name}</title>
       </head>
@@ -140,6 +141,8 @@ export const renderGraphPage = (vault: Vault): string => {
   const content = (
     <html>
       <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href={join("/", vault.rootUrl, "style.css")} />
         <script src="https://cdn.jsdelivr.net/npm/d3@6"></script>
         <script src="https://unpkg.com/force-graph"></script>
