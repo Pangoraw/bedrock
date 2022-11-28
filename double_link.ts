@@ -1,3 +1,4 @@
+import { slugify } from "https://deno.land/x/slugify@0.3.0/mod.ts";
 import { join } from "https://deno.land/std@0.165.0/path/posix.ts";
 import { MarkdownIt, ParseInlineState } from "./ParseState.ts";
 import { ParseEnv } from "./Vault.ts";
@@ -30,7 +31,7 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
 
       const res = parseLabel(state, labelStart);
       if (res === undefined) return false;
-      const { labelEnd, label, alias } = res;
+      const { labelEnd, label, alias, anchor } = res;
 
       // parser failed to find ']', so it's not a valid link
       if (labelEnd < 0) {
@@ -79,10 +80,14 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
 
           let path;
           if (note === undefined) {
+            console.log(label);
             path = label + ".html";
           } else {
             state.env.addReference(note);
             path = note.url().replace(".md", ".html");
+            if (anchor !== undefined) {
+              path += "#" + slugify(anchor);
+            }
           }
           state.pos = labelStart;
           state.posMax = labelEnd;
@@ -107,13 +112,16 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
 const parseLabel = (
   state: ParseInlineState,
   pos: number
-): { labelEnd: number; alias?: string; label: string } | undefined => {
+):
+  | { labelEnd: number; alias?: string; label: string; anchor?: string }
+  | undefined => {
   const labelStart = pos;
 
   while (
     pos < state.posMax &&
     state.src.charCodeAt(pos) !== 0x5d /* ] */ &&
-    state.src.charCodeAt(pos) !== 0x7c /* | */
+    state.src.charCodeAt(pos) !== 0x7c /* | */ &&
+    state.src.charCodeAt(pos) !== 0x23 /* # */
   ) {
     pos++;
   }
@@ -122,8 +130,30 @@ const parseLabel = (
 
   let alias = undefined;
   let label;
-  if (state.src.charCodeAt(pos) === 0x7c /* | */) {
+  let anchor = undefined;
+
+  if (state.src.charCodeAt(pos) === 0x23 /* # */) {
     label = state.src.slice(labelStart, pos);
+    const anchorStart = pos;
+    while (
+      pos < state.posMax &&
+      state.src.charCodeAt(pos) !== 0x5d /* ] */ &&
+      state.src.charCodeAt(pos) !== 0x7c /* | */
+    ) {
+      pos++;
+    }
+
+    if (pos === state.posMax) {
+      return undefined;
+    }
+
+    anchor = state.src.slice(anchorStart + 1, pos);
+  }
+
+  if (state.src.charCodeAt(pos) === 0x7c /* | */) {
+    if (label === undefined) {
+      label = state.src.slice(labelStart, pos);
+    }
     const aliasStart = pos;
 
     while (pos < state.posMax && state.src.charCodeAt(pos) !== 0x5d /* ] */) {
@@ -135,13 +165,20 @@ const parseLabel = (
     }
 
     alias = state.src.slice(aliasStart + 1, pos);
-  } else {
+  }
+
+  if (label === undefined) {
     label = state.src.slice(labelStart, pos);
+  }
+
+  if (anchor !== undefined && alias === undefined) {
+    alias = `${label} > ${anchor}`;
   }
 
   return {
     labelEnd: pos,
     alias,
     label,
+    anchor,
   };
 };

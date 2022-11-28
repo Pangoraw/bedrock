@@ -6,6 +6,7 @@ import {
 } from "https://deno.land/std@0.165.0/path/posix.ts";
 import { walkSync } from "https://deno.land/std@0.165.0/fs/walk.ts";
 import { existsSync } from "https://deno.land/std@0.165.0/node/fs.ts";
+import { slugify } from "https://deno.land/x/slugify@0.3.0/mod.ts";
 
 import MarkdownIt from "npm:markdown-it";
 import task_list from "npm:markdown-it-task-lists";
@@ -36,7 +37,7 @@ export class Vault {
 
   constructor(
     path: string,
-    { attachmentFolderPath, rootUrl, graphOnEachPage } = {
+    { attachmentFolderPath, rootUrl, graphOnEachPage }: VaultOptions = {
       attachmentFolderPath: undefined,
       rootUrl: undefined,
       graphOnEachPage: true,
@@ -45,7 +46,6 @@ export class Vault {
     this.path = path;
     this.rootUrl = rootUrl ?? "/";
 
-    console.log(graphOnEachPage);
     this.renderGraphOnEachPage = graphOnEachPage;
 
     if (!attachmentFolderPath) {
@@ -67,13 +67,20 @@ export class Vault {
       html: true,
     })
       .enable("linkify")
-      // .use(katex)
       .use(mathjax)
       .use(task_list)
       .use(double_link)
       .use(tag_plugin)
       .use(callout_box);
 
+    const proxy = (
+      tokens: Array<Token>,
+      idx: number,
+      options: any,
+      env: ParseEnv,
+      self: MarkdownIt
+    ) => self.renderToken(tokens, idx, options);
+    const imageDefault = this.renderer.renderer.rules.image || proxy;
     this.renderer.renderer.rules.image = (
       tokens: Array<any>,
       idx: number,
@@ -96,16 +103,9 @@ export class Vault {
         token.attrSet("src", newSrc);
       }
 
-      return self.renderToken(tokens, idx, options);
+      return imageDefault(tokens, idx, options);
     };
 
-    const proxy = (
-      tokens: Array<Token>,
-      idx: number,
-      options: any,
-      env: ParseEnv,
-      self: MarkdownIt
-    ) => self.renderToken(tokens, idx, options);
     const headerDefault = this.renderer.renderer.rules.heading_open || proxy;
     this.renderer.renderer.rules.heading_open = (
       tokens: Array<Token>,
@@ -115,6 +115,18 @@ export class Vault {
       self: MarkdownIt
     ): string => {
       const token = tokens[idx];
+
+      if (tokens.length > idx + 1) {
+        const inlineToken = tokens[idx + 1];
+        if (
+          inlineToken.type === "inline" &&
+          inlineToken.children.length === 1 &&
+          inlineToken.children[0].type === "text"
+        ) {
+          const textToken = inlineToken.children[0];
+          token.attrSet("id", slugify(textToken.content));
+        }
+      }
       if (token.tag === "h1") {
         env.hasTitle = true;
       }
@@ -216,6 +228,12 @@ export class Note {
     }
 
     return content.join("\n");
+  }
+
+  renderTokens(): Array<Token> {
+    const fileContent = Deno.readTextFileSync(this.absPath());
+    const env = new ParseEnv(this, this.vault);
+    return this.vault.renderer.parse(fileContent, env);
   }
 
   render(): string {
