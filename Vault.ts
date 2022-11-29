@@ -74,10 +74,10 @@ export class Vault {
       );
       this.assetPath = obsConfig.attachmentFolderPath;
     } else {
-      if (typeof attachmentFolderPath !== "string") {
-        throw Error(`invalid attachment path: ${attachmentFolderPath}`);
-      }
       this.assetPath = attachmentFolderPath;
+    }
+    if (typeof this.assetPath !== "string" || this.assetPath === undefined) {
+      throw Error(`invalid attachment path: ${this.assetPath}`);
     }
 
     this.files = [];
