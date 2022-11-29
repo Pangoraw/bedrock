@@ -17,6 +17,7 @@ import tag_plugin from "./tag.ts";
 import callout_box from "./callout_box.ts";
 import { highlightCode } from "./highlight.ts";
 import { Token } from "./ParseState.ts";
+import { assert } from "https://deno.land/std@0.165.0/_util/asserts.ts";
 
 type Optional<T> = T | null;
 
@@ -63,8 +64,6 @@ export class Vault {
     this.path = path;
     this.rootUrl = rootUrl === undefined ? "/" : rootUrl;
 
-    console.log("rootUrl", this.rootUrl);
-    console.log("title", title);
     this.title = title;
 
     this.renderGraphOnEachPage = graphOnEachPage;
@@ -75,6 +74,9 @@ export class Vault {
       );
       this.assetPath = obsConfig.attachmentFolderPath;
     } else {
+      if (typeof attachmentFolderPath !== "string") {
+        throw Error(`invalid attachment path: ${attachmentFolderPath}`);
+      }
       this.assetPath = attachmentFolderPath;
     }
 
