@@ -273,7 +273,14 @@ export class Note {
 
     const fileContent = Deno.readTextFileSync(this.absPath());
     const env = new ParseEnv(this, this.vault);
-    const output = this.vault.renderer.render(fileContent, env);
+    let output;
+    try {
+      output = this.vault.renderer.render(fileContent, env);
+    } catch (exception) {
+      const msg = exception.stack ?? exception.toString();
+      console.warn(`error: rendering ${this.name()}:\n${msg}`);
+      output = "<pre><code>" + msg + "</code></pre>";
+    }
     this.hasTitle = env.hasTitle;
     return output;
   }
