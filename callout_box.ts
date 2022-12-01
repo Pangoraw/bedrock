@@ -282,9 +282,9 @@ function blockquote_with_type(
 
   let cls;
   if (["help", "warning", "note"].includes(type)) {
-    cls = `callout-${type}`;
+    cls = `callout callout-${type}`;
   } else {
-    cls = "callout-unknown";
+    cls = "callout callout-unknown";
   }
   token.attrs = [["class", cls]];
 

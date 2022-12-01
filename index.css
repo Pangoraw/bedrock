@@ -30,6 +30,35 @@ ul.contains-task-list {
   @apply list-none pl-3;
 }
 
+.prose blockquote.callout {
+    quotes: none;
+    @apply py-2 dark:bg-indigo-500 bg-indigo-100 border-indigo-400 dark:border-indigo-800 rounded-r-lg;
+}
+
+.prose blockquote.callout.callout-warning {
+    @apply dark:bg-orange-500 bg-orange-100 border-orange-400 dark:border-orange-800;
+}
+
+.prose blockquote.callout.callout-error {
+    @apply dark:bg-red-500 bg-red-100 border-red-400 dark:border-red-800;
+}
+
+.prose blockquote.callout p:first-child {
+    @apply text-lg text-indigo-400 dark:text-indigo-800;
+}
+
+.prose blockquote.callout.callout-warning p:first-child {
+    @apply text-orange-400 dark:text-orange-800;
+}
+
+.prose blockquote.callout.callout-error p:first-child {
+    @apply text-red-400 dark:text-red-800;
+}
+
+.prose blockquote.callout p {
+    @apply not-italic my-0;
+}
+
 mjx-container svg {
   display: inline;
 }

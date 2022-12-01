@@ -186,7 +186,7 @@ export class Vault {
       const token = tokens[idx];
       const type = token.content;
       const typeTitle = type[0].toUpperCase() + type.slice(1);
-      return `<p div="callout-${type}">${typeTitle}</p>`;
+      return `<p class="callout callout-${type}">${typeTitle}</p>`;
     };
   }
 
