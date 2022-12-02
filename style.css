@@ -1205,6 +1205,22 @@ ul.contains-task-list {
   }
 }
 
+.prose blockquote.callout.callout-error {
+  --tw-border-opacity: 1;
+  border-color: rgb(248 113 113 / var(--tw-border-opacity));
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 226 226 / var(--tw-bg-opacity));
+}
+
+@media (prefers-color-scheme: dark) {
+  .prose blockquote.callout.callout-error {
+    --tw-border-opacity: 1;
+    border-color: rgb(153 27 27 / var(--tw-border-opacity));
+    --tw-bg-opacity: 1;
+    background-color: rgb(239 68 68 / var(--tw-bg-opacity));
+  }
+}
+
 .prose blockquote.callout p:first-child {
   font-size: 1.125rem;
   line-height: 1.75rem;
@@ -1228,6 +1244,18 @@ ul.contains-task-list {
   .prose blockquote.callout.callout-warning p:first-child {
     --tw-text-opacity: 1;
     color: rgb(154 52 18 / var(--tw-text-opacity));
+  }
+}
+
+.prose blockquote.callout.callout-error p:first-child {
+  --tw-text-opacity: 1;
+  color: rgb(248 113 113 / var(--tw-text-opacity));
+}
+
+@media (prefers-color-scheme: dark) {
+  .prose blockquote.callout.callout-error p:first-child {
+    --tw-text-opacity: 1;
+    color: rgb(153 27 27 / var(--tw-text-opacity));
   }
 }
 
