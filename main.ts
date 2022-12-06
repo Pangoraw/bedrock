@@ -27,6 +27,8 @@ import {
 } from "./template.tsx";
 import { generateCss } from "./tailwind.ts";
 import { buildIndex } from "./search.ts";
+import { ERROR_JOIN_TO_SUBST } from "https://deno.land/std@0.165.0/node/internal_binding/_winerror.ts";
+import { ERR_STREAM_NULL_VALUES } from "https://deno.land/std@0.165.0/node/internal/errors.ts";
 
 const exportVault = async (vault: Vault, dest: string) => {
   dest = normalize(dest);
@@ -102,20 +104,48 @@ const exportVault = async (vault: Vault, dest: string) => {
   const graphDir = join(miscPath, "graph");
   await ensureDir(graphDir);
   const noteIds: Record<string, number> = {};
-  const nodes = vault.notes.map((note, i) => {
+  let nodes = vault.notes.map((note, i) => {
     noteIds[note.absPath()] = i;
     return {
       id: i,
       url: note.url(),
       name: note.name(),
+      tag: note.tags.length > 0 ? note.tags[0] : undefined,
+      connectivity: 0.25 * Math.sqrt(note.tags.length + note.backlinks.size), // TODO: forward links as well
     };
   });
-  const links = vault.notes.flatMap((note) =>
-    [...note.backlinks].map((link) => ({
-      source: noteIds[note.absPath()],
-      target: noteIds[link.absPath()],
-    }))
+
+  const numNodes = nodes.length;
+  nodes = nodes.concat(
+    Object.keys(vault.tags).map((tag, i) => {
+      const tagId = numNodes + i;
+      noteIds["__tag#" + tag] = tagId;
+      return {
+        id: tagId,
+        url: join("/", vault.rootUrl, "obsidian", "tags", tag),
+        name: "#" + tag,
+        tag,
+        connectivity: 0.25 * Math.sqrt(vault.tags[tag].size),
+      };
+    })
   );
+  let links = vault.notes.flatMap((note) =>
+    [...note.backlinks]
+      .map((link) => ({
+        source: noteIds[note.absPath()],
+        target: noteIds[link.absPath()],
+      }))
+      .concat()
+  );
+  links = links.concat(
+    Object.entries(vault.tags).flatMap(([tag, notes]) =>
+      [...notes].map((note) => ({
+        source: noteIds["__tag#" + tag],
+        target: noteIds[note.absPath()],
+      }))
+    )
+  );
+
   const graph = { nodes, links };
   await Promise.all([
     Deno.writeTextFile(join(graphDir, "graph.json"), JSON.stringify(graph)),

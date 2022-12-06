@@ -33,6 +33,8 @@ simulation(container)
     highlightNodes.has(node) ? "before" : undefined
   )
   .d3Force("charge", d3.forceManyBody().strength(-5.0))
+  .nodeAutoColorBy("tag")
+  .nodeVal("connectivity")
   .nodeCanvasObject((node, ctx) => {
     if (!navigatedTo && node.id === selectedNoteId) {
       navigatedTo = true;

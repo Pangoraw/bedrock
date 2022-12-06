@@ -126,7 +126,8 @@ export const renderNotesList = (
   vault: Vault,
   title: string,
   notes: Array<Note>,
-  addTitle: boolean
+  addTitle: boolean,
+  addGraph: boolean
 ): string => {
   const list = proseStyle(
     <>
@@ -138,6 +139,10 @@ export const renderNotesList = (
           </li>
         ))}
       </ul>
+
+      {addGraph && vault.renderGraphOnEachPage
+        ? graphComponent(vault, title)
+        : undefined}
     </>
   );
   return ReactDOMServer.renderToStaticMarkup(
@@ -201,26 +206,30 @@ export const render = (vault: Vault, title: string, note: Note): string => {
           </ul>
         </>
       ) : undefined}
-      {vault.renderGraphOnEachPage ? (
-        <>
-          <hr />
-          <h4>Graph view</h4>
-          <iframe
-            src={join(
-              "/",
-              vault.rootUrl,
-              "obsidian",
-              "graph",
-              `?name=${encodeURIComponent(note.name())}`
-            )}
-            frameBorder="0"
-            className="w-full rounded-sm border"
-          ></iframe>
-        </>
-      ) : undefined}
+      {vault.renderGraphOnEachPage
+        ? graphComponent(vault, note.name())
+        : undefined}
     </>
   );
   return ReactDOMServer.renderToStaticMarkup(
     template(prettyTitle(vault, title), content, vault.rootUrl)
   );
 };
+
+const graphComponent = (vault: Vault, name?: string) => (
+  <>
+    <hr />
+    <h4>Graph view</h4>
+    <iframe
+      src={join(
+        "/",
+        vault.rootUrl,
+        "obsidian",
+        "graph",
+        ...(name !== undefined ? [`?name=${encodeURIComponent(name)}`] : [])
+      )}
+      frameBorder="0"
+      className="w-full rounded-sm border"
+    ></iframe>
+  </>
+);
