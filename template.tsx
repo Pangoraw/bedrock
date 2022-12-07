@@ -127,7 +127,7 @@ export const renderNotesList = (
   title: string,
   notes: Array<Note>,
   addTitle: boolean,
-  addGraph: boolean
+  addGraph?: boolean
 ): string => {
   const list = proseStyle(
     <>

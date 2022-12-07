@@ -91,7 +91,7 @@ const exportVault = async (vault: Vault, dest: string) => {
     await ensureFile(tagFile);
     await Deno.writeTextFile(
       tagFile,
-      renderNotesList(vault, `#${tag}`, [...notes], true)
+      renderNotesList(vault, `#${tag}`, [...notes], true, true)
     );
   }
 
