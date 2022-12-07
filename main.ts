@@ -2,10 +2,10 @@ import { serve } from "https://deno.land/std@0.165.0/http/server.ts";
 import { serveDir } from "https://deno.land/std@0.165.0/http/file_server.ts";
 import {
   dirname,
-  join,
-  relative,
-  normalize,
   fromFileUrl,
+  join,
+  normalize,
+  relative,
 } from "https://deno.land/std@0.165.0/path/posix.ts";
 import {
   copy,
@@ -49,9 +49,11 @@ const exportVault = async (vault: Vault, dest: string) => {
   await ensureFile(indexFile);
   await Deno.writeTextFile(indexFile, renderIndexPage(vault));
 
-  for await (const entry of walk(vault.path, {
-    skip: [/.git.*/, /.obsidian/],
-  })) {
+  for await (
+    const entry of walk(vault.path, {
+      skip: [/.git.*/, /.obsidian/],
+    })
+  ) {
     const relPath = relative(vault.path, entry.path);
     const targetPath = join(dest, relPath);
 
@@ -91,7 +93,7 @@ const exportVault = async (vault: Vault, dest: string) => {
     await ensureFile(tagFile);
     await Deno.writeTextFile(
       tagFile,
-      renderNotesList(vault, `#${tag}`, [...notes], true, true)
+      renderNotesList(vault, `#${tag}`, [...notes], true, true),
     );
   }
 
@@ -111,7 +113,10 @@ const exportVault = async (vault: Vault, dest: string) => {
       url: note.url(),
       name: note.name(),
       tag: note.tags.length > 0 ? note.tags[0] : undefined,
-      connectivity: 0.25 * Math.sqrt(note.tags.length + note.backlinks.size), // TODO: forward links as well
+      connectivity: 0.25 *
+        Math.sqrt(
+          note.tags.length + note.backlinks.size + note.forwardLinks.size,
+        ),
     };
   });
 
@@ -127,7 +132,7 @@ const exportVault = async (vault: Vault, dest: string) => {
         tag,
         connectivity: 0.25 * Math.sqrt(vault.tags[tag].size),
       };
-    })
+    }),
   );
   let links = vault.notes.flatMap((note) =>
     [...note.backlinks]
@@ -143,7 +148,7 @@ const exportVault = async (vault: Vault, dest: string) => {
         source: noteIds["__tag#" + tag],
         target: noteIds[note.absPath()],
       }))
-    )
+    ),
   );
 
   const graph = { nodes, links };
@@ -165,7 +170,7 @@ const httpServer = async (rootUrl: string, dest: string) => {
     },
     {
       port: 8080,
-    }
+    },
   );
 };
 

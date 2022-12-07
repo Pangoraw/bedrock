@@ -234,6 +234,7 @@ export class Note {
   vault: Vault;
   tags: Array<string> = [];
   backlinks: Set<Note> = new Set();
+  forwardLinks: Set<Note> = new Set();
 
   hasTitle = false;
   private cached_content: Optional<string> = null;
@@ -335,5 +336,6 @@ export class ParseEnv {
 
   addReference(note: Note) {
     note.backlinks.add(this.currentNote);
+    this.currentNote.forwardLinks.add(note);
   }
 }
