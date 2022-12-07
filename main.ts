@@ -27,8 +27,9 @@ import {
 } from "./template.tsx";
 import { generateCss } from "./tailwind.ts";
 import { buildIndex } from "./search.ts";
-import { ERROR_JOIN_TO_SUBST } from "https://deno.land/std@0.165.0/node/internal_binding/_winerror.ts";
-import { ERR_STREAM_NULL_VALUES } from "https://deno.land/std@0.165.0/node/internal/errors.ts";
+
+const nodeConnectivity = (x: number): number =>
+  0.25 * Math.sqrt(Math.max(1, x));
 
 const exportVault = async (vault: Vault, dest: string) => {
   dest = normalize(dest);
@@ -113,10 +114,9 @@ const exportVault = async (vault: Vault, dest: string) => {
       url: note.url(),
       name: note.name(),
       tag: note.tags.length > 0 ? note.tags[0] : undefined,
-      connectivity: 0.25 *
-        Math.sqrt(
-          note.tags.length + note.backlinks.size + note.forwardLinks.size,
-        ),
+      connectivity: nodeConnectivity(
+        note.tags.length + note.backlinks.size + note.forwardLinks.size,
+      ),
     };
   });
 
@@ -130,7 +130,7 @@ const exportVault = async (vault: Vault, dest: string) => {
         url: join("/", vault.rootUrl, "obsidian", "tags", tag),
         name: "#" + tag,
         tag,
-        connectivity: 0.25 * Math.sqrt(vault.tags[tag].size),
+        connectivity: nodeConnectivity(vault.tags[tag].size),
       };
     }),
   );
