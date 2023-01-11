@@ -276,14 +276,14 @@ export class Note {
     const env = new ParseEnv(this, this.vault);
     let output;
     try {
-      output = this.vault.renderer.render(fileContent, env);
+      this.cached_content = this.vault.renderer.render(fileContent, env);
     } catch (exception) {
       const msg = exception.stack ?? exception.toString();
       console.warn(`error: rendering ${this.name()}:\n${msg}`);
-      output = "<pre><code>" + msg + "</code></pre>";
+      this.cached_content = "<pre><code>" + msg + "</code></pre>";
     }
     this.hasTitle = env.hasTitle;
-    return output;
+    return this.cached_content;
   }
 
   absPath(): string {

@@ -50,6 +50,11 @@ const exportVault = async (vault: Vault, dest: string) => {
   await ensureFile(indexFile);
   await Deno.writeTextFile(indexFile, renderIndexPage(vault));
 
+  // Pre-render notes to get backlinks
+  for (const note of vault.notes) {
+      note.render();
+  }
+
   for await (
     const entry of walk(vault.path, {
       skip: [/.git.*/, /.obsidian/],
