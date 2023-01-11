@@ -15,7 +15,7 @@ export const generateCss = async () => {
   }
 
   const hljsTheme = await fetch(
-    "https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/github-dark-dimmed.min.css"
+    "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark-dimmed.min.css"
   ).then((res) => res.text());
 
   await Deno.writeTextFile("./style.css", hljsTheme, { append: true });
