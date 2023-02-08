@@ -15,6 +15,10 @@ blockquote.callout-help {
   word-wrap: break-word;
 }
 
+mark {
+  @apply bg-amber-200;
+}
+
 .prose hr {
   @apply my-5;
 }

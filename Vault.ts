@@ -15,6 +15,7 @@ import mathjax from "npm:markdown-it-mathjax3";
 import double_link from "./double_link.ts";
 import tag_plugin from "./tag.ts";
 import callout_box from "./callout_box.ts";
+import highlightInline from "./highlight_inline.ts"
 import { highlightCode } from "./highlight.ts";
 import { Token } from "./ParseState.ts";
 import { assert } from "https://deno.land/std@0.165.0/_util/asserts.ts";
@@ -96,7 +97,8 @@ export class Vault {
       .use(task_list)
       .use(double_link)
       .use(tag_plugin)
-      .use(callout_box);
+      .use(callout_box)
+      .use(highlightInline);
 
     const proxy: Renderer = (
       tokens: Array<Token>,

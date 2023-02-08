@@ -1151,6 +1151,11 @@ blockquote.callout-help {
   word-wrap: break-word;
 }
 
+mark {
+  --tw-bg-opacity: 1;
+  background-color: rgb(253 230 138 / var(--tw-bg-opacity));
+}
+
 .prose hr {
   margin-top: 1.25rem;
   margin-bottom: 1.25rem;
