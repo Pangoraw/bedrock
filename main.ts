@@ -22,6 +22,7 @@ import {
   render,
   renderGraphPage,
   renderIndexPage,
+  renderLinksList,
   renderNotesList,
   searchPage,
 } from "./template.tsx";
@@ -52,7 +53,7 @@ const exportVault = async (vault: Vault, dest: string) => {
 
   // Pre-render notes to get backlinks
   for (const note of vault.notes) {
-      note.render();
+    note.render();
   }
 
   for await (
@@ -90,8 +91,23 @@ const exportVault = async (vault: Vault, dest: string) => {
     }
   }
 
-  const tagsDir = join(miscPath, "tags");
   await ensureDir(miscPath);
+  const tagsDir = join(miscPath, "tags");
+  await ensureDir(tagsDir);
+
+  const tagsIndexFile = join(tagsDir, "index.html");
+  await Deno.writeTextFile(
+    tagsIndexFile,
+    renderLinksList(
+      vault,
+      "Tags",
+      Object.keys(vault.tags).map((tag) => ({
+        name: `#${tag}`,
+        url: join("/", vault.rootUrl, "obsidian", "tags", tag),
+      })),
+    ),
+  );
+
   for (const [tag, notes] of Object.entries(vault.tags)) {
     const tagDir = join(tagsDir, tag);
     await ensureDir(tagDir);
