@@ -58,12 +58,19 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
           const maybeNote = state.env.vault.findNoteByName(label);
 
           if (maybeNote === undefined) {
-            const imgSrc = state.env.findAsset(label);
-            token = state.push("image", "img", 0);
+            const src = state.env.findAsset(label);
+
+            let token;
+            if (src.endsWith(".pdf")) {
+              token = state.push("embed", "iframe", 0);
+            } else {
+              token = state.push("image", "img", 0);
+            }
             token.children = []; // Add empty children list
             token.attrs = [
-              ["src", imgSrc],
+              ["src", src],
               ["alt", label],
+              ["class", "embed"]
             ];
             if (alias !== undefined) {
               token.attrPush(["width", alias]);
@@ -107,14 +114,14 @@ export default function double_link_plugin(md: MarkdownIt, _opts: any) {
       state.pos = pos;
       state.posMax = max;
       return true;
-    }
+    },
   );
 }
 
 // Assumes that pos is at '[' + 1
 const parseLabel = (
   state: ParseInlineState,
-  pos: number
+  pos: number,
 ):
   | { labelEnd: number; alias?: string; label: string; anchor?: string }
   | undefined => {

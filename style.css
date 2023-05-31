@@ -1161,6 +1161,11 @@ mark {
   margin-bottom: 1.25rem;
 }
 
+.prose iframe.embed {
+  width: 100%;
+  height: 100%;
+}
+
 .prose ul > li > :last-child,
 .prose ul > li > :first-child,
 .prose ul > li {
