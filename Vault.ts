@@ -15,7 +15,7 @@ import mathjax from "npm:markdown-it-mathjax3";
 import double_link from "./double_link.ts";
 import tag_plugin from "./tag.ts";
 import callout_box from "./callout_box.ts";
-import highlightInline from "./highlight_inline.ts"
+import highlightInline from "./highlight_inline.ts";
 import { highlightCode } from "./highlight.ts";
 import { Token } from "./ParseState.ts";
 import { assert } from "https://deno.land/std@0.165.0/_util/asserts.ts";
@@ -128,6 +128,14 @@ export class Vault {
       ) {
         const newSrc = env.findAsset(src);
         token.attrSet("src", newSrc);
+      }
+
+      if (src.startsWith("http")) {
+        const url = new URL(src);
+        if (url.host == "www.youtube.com" && url.searchParams.has("v")) {
+          const videoId = url.searchParams.get("v");
+          return `<iframe width="640" height="360" src="https://www.youtube.com/embed/${videoId}"></iframe>`;
+        }
       }
 
       return imageDefault(tokens, idx, options, env, self);
