@@ -7,6 +7,11 @@ blockquote.callout-help {
   padding-left: 5px;
 }
 
+:root { font-family: 'Inter', sans-serif; }
+@supports (font-variation-settings: normal) {
+  :root { font-family: 'Inter var', sans-serif; }
+}
+
 .tag {
   @apply px-2 text-sm rounded-full border border-solid border-zinc-800 bg-sky-100 hover:bg-sky-200 dark:bg-sky-600 dark:hover:bg-sky-500 transition-colors no-underline;
 }

@@ -63,6 +63,8 @@ const template = (name: string, content: any, rootUrl = "/") => {
         <meta charSet="utf-8"></meta>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="shortcut icon" href={join("/", rootUrl, "favicon.ico")} />
+        <link rel="preconnect" href="https://rsms.me/"></link>
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css"></link>
         <title>{name}</title>
       </head>
       <body className="dark:bg-zinc-800">

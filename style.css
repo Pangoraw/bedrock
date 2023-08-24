@@ -1112,6 +1112,16 @@ blockquote.callout-help {
   padding-left: 5px;
 }
 
+:root {
+  font-family: 'Inter', sans-serif;
+}
+
+@supports (font-variation-settings: normal) {
+  :root {
+    font-family: 'Inter var', sans-serif;
+  }
+}
+
 .tag {
   border-radius: 9999px;
   border-width: 1px;
