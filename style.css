@@ -1031,12 +1031,24 @@ video {
   margin-top: 0.25rem;
 }
 
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.mb-0 {
+  margin-bottom: 0px;
+}
+
 .block {
   display: block;
 }
 
 .flex {
   display: flex;
+}
+
+.table {
+  display: table;
 }
 
 .w-full {

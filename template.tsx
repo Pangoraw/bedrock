@@ -5,6 +5,7 @@ import {
 } from "https://deno.land/std@0.165.0/path/posix.ts";
 import ReactDOMServer from "https://jspm.dev/react-dom@16.14.0/server";
 import React from "https://jspm.dev/react@16.14.0";
+import { default as titleCase } from "https://deno.land/x/case@2.2.0/titleCase.ts";
 
 import { Note, Vault } from "./Vault.ts";
 
@@ -41,11 +42,7 @@ const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
 };
 
 const prettyTitle = (vault: Vault, title: string) =>
-  vault.title === undefined
-    ? (
-      title
-    )
-    : title.length === 0
+  vault.title === undefined ? title : title.length === 0
     ? (
       vault.title
     )
@@ -220,6 +217,50 @@ export const renderGraphPage = (vault: Vault): string => {
   return ReactDOMServer.renderToStaticMarkup(content);
 };
 
+const formatDate = (d: Date): string =>
+  d.getDay().toString().padStart(2, "0") + "/" +
+  (d.getMonth() + 1).toString().padStart(2, "0") + "/" +
+  d.getFullYear().toString();
+
+const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
+  if (tags && typeof prop == "string") {
+    const delta = 0 + prop.startsWith("#");
+    return (
+      <a
+        href={join("/", vault.rootUrl, "obsidian", "tags", prop.slice(delta))}
+        className="tag"
+      >
+        {prop}
+      </a>
+    );
+  }
+
+  if (typeof prop == "string") return <span>{prop}</span>;
+
+  if (Array.isArray(prop)) {
+    return prop.map((p, i) => (
+      <span key={i} className="mr-2">{renderProperties(vault, p, tags)}</span>
+    ));
+  }
+
+  if (prop instanceof Date) {
+    return formatDate(prop);
+  }
+
+  if (typeof prop === "boolean") {
+    return (
+      <input
+        type="checkbox"
+        style={{pointerEvents: "none"}}
+        checked={prop ? "checked" : ""}
+        readOnly
+      />
+    );
+  }
+
+  return prop;
+};
+
 export const render = (vault: Vault, title: string, note: Note): string => {
   const renderedContent = note.render();
   const addTitle = !note.hasTitle;
@@ -228,6 +269,23 @@ export const render = (vault: Vault, title: string, note: Note): string => {
   const content = proseStyle(
     <>
       {addTitle ? <h1>{note.name()}</h1> : undefined}
+      <table className="mb-0">
+        <thead>
+          <tr>
+            <td>Properties</td>
+            <td></td>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(note.properties).map(([k, v]) => (
+            <tr key={k}>
+              <td className="">{titleCase(k)}</td>
+              <td className="">{renderProperties(vault, v, k === "tags")}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       <div dangerouslySetInnerHTML={{ __html: renderedContent }}></div>
 
       {backNotes.length > 0

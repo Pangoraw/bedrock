@@ -24,9 +24,9 @@ function showResults(results) {
   const index = lunr.Index.load(data["index"]);
 
   textInput.addEventListener("input", () => {
-    console.log(index.search);
+    // console.log(index.search);
     const results = index.search(textInput.value);
-    console.log(results);
+    // console.log(results);
     const docs = results.map((res) =>
       documents.find((doc) => doc.url == res.ref)
     );

@@ -184,7 +184,6 @@ const exportVault = async (vault: Vault, dest: string) => {
 
 const httpServer = async (rootUrl: string, dest: string) => {
   if (rootUrl.endsWith("/")) rootUrl = rootUrl.slice(0, rootUrl.length - 1);
-  console.log("rootUrl", rootUrl);
   await serve(
     (req) => {
       return serveDir(req, { urlRoot: rootUrl, fsRoot: dest });
