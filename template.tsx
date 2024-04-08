@@ -251,7 +251,7 @@ const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
     return (
       <input
         type="checkbox"
-        style={{pointerEvents: "none"}}
+        style={{ pointerEvents: "none" }}
         checked={prop ? "checked" : ""}
         readOnly
       />
@@ -269,22 +269,28 @@ export const render = (vault: Vault, title: string, note: Note): string => {
   const content = proseStyle(
     <>
       {addTitle ? <h1>{note.name()}</h1> : undefined}
-      <table className="mb-0">
-        <thead>
-          <tr>
-            <td>Properties</td>
-            <td></td>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.entries(note.properties).map(([k, v]) => (
-            <tr key={k}>
-              <td className="">{titleCase(k)}</td>
-              <td className="">{renderProperties(vault, v, k === "tags")}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {Object.keys(note.properties).length > 0
+        ? (
+          <table className="mb-0">
+            <thead>
+              <tr>
+                <td>Properties</td>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(note.properties).map(([k, v]) => (
+                <tr key={k}>
+                  <td className="">{titleCase(k)}</td>
+                  <td className="">
+                    {renderProperties(vault, v, k === "tags")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )
+        : undefined}
 
       <div dangerouslySetInnerHTML={{ __html: renderedContent }}></div>
 
