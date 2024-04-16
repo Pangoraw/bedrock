@@ -258,7 +258,7 @@ const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
     );
   }
 
-  return prop;
+  return undefined
 };
 
 export const render = (vault: Vault, title: string, note: Note): string => {

@@ -27,7 +27,7 @@ type Renderer = (
   index: number,
   options: any,
   env: ParseEnv,
-  self: MarkdownItType
+  self: MarkdownItType,
 ) => string;
 type MarkdownItType = {
   renderer: {
@@ -60,7 +60,7 @@ export class Vault {
       rootUrl: undefined,
       graphOnEachPage: true,
       title: undefined,
-    }
+    },
   ) {
     this.path = path;
     this.rootUrl = rootUrl === undefined ? "/" : rootUrl;
@@ -71,7 +71,7 @@ export class Vault {
 
     if (!attachmentFolderPath) {
       const obsConfig = JSON.parse(
-        Deno.readTextFileSync(join(this.path, ".obsidian", "app.json"))
+        Deno.readTextFileSync(join(this.path, ".obsidian", "app.json")),
       );
       this.assetPath = obsConfig.attachmentFolderPath;
     } else {
@@ -106,7 +106,7 @@ export class Vault {
       idx: number,
       options: any,
       env: ParseEnv,
-      self: MarkdownItType
+      self: MarkdownItType,
     ) => self.renderToken(tokens, idx, options);
     const imageDefault: Renderer = this.renderer.renderer.rules.image || proxy;
     this.renderer.renderer.rules.image = (
@@ -114,7 +114,7 @@ export class Vault {
       idx: number,
       options: any,
       env: ParseEnv,
-      self: MarkdownItType
+      self: MarkdownItType,
     ): string => {
       const token = tokens[idx];
       const rawSrc: string | null = token.attrGet("src");
@@ -142,14 +142,14 @@ export class Vault {
       return imageDefault(tokens, idx, options, env, self);
     };
 
-    const headerDefault: Renderer =
-      this.renderer.renderer.rules.heading_open || proxy;
+    const headerDefault: Renderer = this.renderer.renderer.rules.heading_open ||
+      proxy;
     this.renderer.renderer.rules.heading_open = (
       tokens: Array<Token>,
       idx: number,
       options: any,
       env: ParseEnv,
-      self: MarkdownItType
+      self: MarkdownItType,
     ): string => {
       const token = tokens[idx];
 
@@ -170,14 +170,14 @@ export class Vault {
       return headerDefault(tokens, idx, options, env, self);
     };
 
-    const linkDefault: Renderer =
-      this.renderer.renderer.rules.link_open || proxy;
+    const linkDefault: Renderer = this.renderer.renderer.rules.link_open ||
+      proxy;
     this.renderer.renderer.rules.link_open = (
       tokens: Array<Token>,
       idx: number,
       options: any,
       env: ParseEnv,
-      self: MarkdownItType
+      self: MarkdownItType,
     ) => {
       const token = tokens[idx];
       const href = token.attrGet("href");
@@ -194,7 +194,7 @@ export class Vault {
       idx: number,
       options: Record<never, never>,
       env: ParseEnv,
-      self: MarkdownItType
+      self: MarkdownItType,
     ): string => {
       const token = tokens[idx];
       const type = token.content;
@@ -210,7 +210,7 @@ export class Vault {
 
   findNoteByName(name: string): Note | undefined {
     return this.notes.find(
-      (note) => note.name().toLowerCase() === name.toLowerCase()
+      (note) => note.name().toLowerCase() === name.toLowerCase(),
     );
   }
 
@@ -228,9 +228,11 @@ export class Vault {
 
   exploreDir(path: string) {
     const currentPath = join(this.path, path);
-    for (const file of walkSync(currentPath, {
-      exts: ["md"],
-    })) {
+    for (
+      const file of walkSync(currentPath, {
+        exts: ["md"],
+      })
+    ) {
       if (file.isFile && file.name.endsWith(".md")) {
         const filePath = "/" + relative(currentPath, file.path);
         this.files.push(filePath);
@@ -325,6 +327,15 @@ export class ParseEnv {
 
   addProperty(key: string, value: any) {
     this.currentNote.properties[key] = value;
+    if (key === "tags") {
+      if (Array.isArray(value)) {
+        for (const tag of value) {
+          this.vault.addTagRef(tag, this.currentNote);
+        }
+      } else if (typeof value === "string") {
+        this.vault.addTagRef(value, this.currentNote);
+      }
+    }
   }
 
   addTag(tag: string) {
@@ -345,7 +356,7 @@ export class ParseEnv {
       return join(
         "/",
         this.vault.rootUrl,
-        relative(this.vault.path, assetPath)
+        relative(this.vault.path, assetPath),
       );
     }
 
