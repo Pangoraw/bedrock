@@ -235,7 +235,12 @@ const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
     );
   }
 
-  if (typeof prop == "string") return <span>{prop}</span>;
+  if (typeof prop === "string") {
+    if (prop.startsWith("http://") || prop.startsWith("https://")) {
+      return <a target="_blank" href={prop}>{prop}</a>;
+    }
+    return <span>{prop}</span>;
+  }
 
   if (Array.isArray(prop)) {
     return prop.map((p, i) => (
@@ -258,7 +263,7 @@ const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
     );
   }
 
-  return undefined
+  return undefined;
 };
 
 export const render = (vault: Vault, title: string, note: Note): string => {
