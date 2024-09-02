@@ -93,6 +93,7 @@ const exportVault = async (vault: Vault, dest: string) => {
 
   await ensureDir(miscPath);
   const tagsDir = join(miscPath, "tags");
+  // await copy(join(__dirname, "toc.js"), join(miscPath, "toc.js"));
   await ensureDir(tagsDir);
 
   const tagsIndexFile = join(tagsDir, "index.html");

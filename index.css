@@ -82,3 +82,17 @@ mjx-container {
   box-sizing: border-box;
   overflow-x: scroll;
 }
+
+#bedrock-toc {
+  position: fixed;
+  display: block;
+  width: 300px;
+  background: aliceblue;
+  transform: translateX(-330px);
+  top: 50px;
+  @apply rounded-sm;
+}
+
+#bedrock-toc > p {
+  @apply text-sm m-0 hover:bg-sky-200 px-2 hover:cursor-pointer;
+}

@@ -266,6 +266,8 @@ const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
   return undefined;
 };
 
+const TableOfContent = ({ note }) => {}
+
 export const render = (vault: Vault, title: string, note: Note): string => {
   const renderedContent = note.render();
   const addTitle = !note.hasTitle;
@@ -274,6 +276,7 @@ export const render = (vault: Vault, title: string, note: Note): string => {
   const content = proseStyle(
     <>
       {addTitle ? <h1>{note.name()}</h1> : undefined}
+      <div id="bedrock-toc"></div>
       {Object.keys(note.properties).length > 0
         ? (
           <table className="mb-0">
@@ -317,6 +320,8 @@ export const render = (vault: Vault, title: string, note: Note): string => {
       {vault.renderGraphOnEachPage
         ? graphComponent(vault, note.name())
         : undefined}
+
+      <script src={join("/", vault.rootUrl, "obsidian", "toc.js")} />
     </>,
   );
   return ReactDOMServer.renderToStaticMarkup(

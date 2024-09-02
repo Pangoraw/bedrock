@@ -290,7 +290,6 @@ export class Note {
 
     const fileContent = Deno.readTextFileSync(this.absPath());
     const env = new ParseEnv(this, this.vault);
-    let output;
     try {
       this.cached_content = this.vault.renderer.render(fileContent, env);
     } catch (exception) {

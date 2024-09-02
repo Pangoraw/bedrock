@@ -1307,6 +1307,30 @@ mjx-container {
   overflow-x: scroll;
 }
 
+#bedrock-toc {
+  position: fixed;
+  display: block;
+  width: 300px;
+  background: aliceblue;
+  transform: translateX(-330px);
+  top: 50px;
+  border-radius: 0.125rem;
+}
+
+#bedrock-toc > p {
+  margin: 0px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+#bedrock-toc > p:hover {
+  cursor: pointer;
+  --tw-bg-opacity: 1;
+  background-color: rgb(186 230 253 / var(--tw-bg-opacity));
+}
+
 .hover\:text-gray-900:hover {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity));
