@@ -66,7 +66,7 @@ const template = (name: string, content: any, rootUrl = "/") => {
       </head>
       <body className="dark:bg-zinc-800">
         <div className="">
-          <nav className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl mb-5 py-2 border-b border-zinc-200 flex">
+          <nav className="print:hidden mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl mb-5 py-2 border-b border-zinc-200 flex">
             <a
               className="flex hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
               href={join("/", rootUrl)}
@@ -97,6 +97,7 @@ const template = (name: string, content: any, rootUrl = "/") => {
           <main className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl">
             {content}
           </main>
+
           {/* </main> */}
         </div>
       </body>
@@ -304,7 +305,7 @@ export const render = (vault: Vault, title: string, note: Note): string => {
 
       {backNotes.length > 0
         ? (
-          <>
+          <div className="print:hidden">
             <hr />
             <h4>Backlinks</h4>
             <ul>
@@ -314,7 +315,7 @@ export const render = (vault: Vault, title: string, note: Note): string => {
                 </li>
               ))}
             </ul>
-          </>
+          </div>
         )
         : undefined}
       {vault.renderGraphOnEachPage
@@ -330,7 +331,7 @@ export const render = (vault: Vault, title: string, note: Note): string => {
 };
 
 const graphComponent = (vault: Vault, name?: string) => (
-  <>
+  <div className="print:hidden">
     <hr />
     <h4>Graph view</h4>
     <iframe
@@ -345,5 +346,5 @@ const graphComponent = (vault: Vault, name?: string) => (
       className="w-full rounded-sm border"
     >
     </iframe>
-  </>
+  </div>
 );

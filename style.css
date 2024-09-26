@@ -1405,6 +1405,12 @@ mjx-container {
   }
 }
 
+@media print {
+  .print\:hidden {
+    display: none;
+  }
+}
+
 @media (min-width: 768px) {
   .md\:mx-auto {
     margin-left: auto;
