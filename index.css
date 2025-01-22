@@ -80,7 +80,7 @@ mjx-container svg {
 mjx-container {
   display: inline;
   box-sizing: border-box;
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 
 #bedrock-toc {
