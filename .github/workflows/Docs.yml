@@ -22,7 +22,7 @@ jobs:
       - name: Build
         run: bedrock export ./docs
       - name: Push to Github pages
-        uses: actions/upload-pages-artifacts@v2.0
+        uses: actions/upload-pages-artifact@v2.0
         with:
           path: ./public/
       - name: Deploy pages
