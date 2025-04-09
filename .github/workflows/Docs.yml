@@ -21,12 +21,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Bedrock Export
         run: |
-          docker run --rm \
-            --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest \
-            bedrock export /vault \
-              --output=/vault/public \
-              --title="Bedrock Docs" \
-              --root-url=bedrock
+          ls
+          ls docs
+          docker run --rm --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest bedrock export /vault --output /vault/public
+          # docker run --rm \
+          #   --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest \
+          #   bedrock export /vault \
+          #     --output=/vault/public \
+          #     --title="Bedrock Docs" \
+          #     --root-url=bedrock
       - name: Push to Github pages
         uses: actions/upload-pages-artifact@v3.0
         with:
