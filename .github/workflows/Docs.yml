@@ -17,4 +17,8 @@ jobs:
       - name: Build
         run: bedrock export ./docs
       - name: Push to Github pages
-        run: ls public
+        uses: actions/upload-pages-artifacts@v2.0
+        with:
+          path: ./public/
+      - name: Deploy pages
+        uses: actions/deploy-pages@v1.2
