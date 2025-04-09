@@ -22,7 +22,7 @@ jobs:
       - name: Bedrock Export
         run: |
           docker run --rm \
-            --volume ./docs/:/vault/ ghcr.io/pangoraw/bedrock:latest \
+            --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest \
             bedrock export /vault \
               --output=/vault \
               --title="Bedrock Docs" \
