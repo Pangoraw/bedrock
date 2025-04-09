@@ -24,7 +24,7 @@ jobs:
           docker run --rm \
             --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest \
             bedrock export /vault \
-              --output=/vault \
+              --output=/vault/public \
               --title="Bedrock Docs" \
               --root-url=bedrock
       - name: Push to Github pages
