@@ -21,8 +21,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Bedrock Export
         run: |
-          docker run --rm ghcr.io/pangoraw/bedrock:latest \
-            --volume ./docs/:/vault/ bedrock export /vault \
+          docker run --rm \
+            --volume ./docs/:/vault/ ghcr.io/pangoraw/bedrock:latest \
+            bedrock export /vault \
               --output=/vault \
               --title="Bedrock Docs" \
               --root-url=bedrock
