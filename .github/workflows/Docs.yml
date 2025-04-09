@@ -15,21 +15,26 @@ permissions:
 jobs:
   build_and_push_docs:
     runs-on: ubuntu-latest
-    container: docker:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Bedrock Export
-        run: |
-          ls
-          ls docs
-          docker run --rm --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest ls -lah /vault # bedrock export /vault --output /vault/public
-          # docker run --rm \
-          #   --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest \
-          #   bedrock export /vault \
-          #     --output=/vault/public \
-          #     --title="Bedrock Docs" \
-          #     --root-url=bedrock
+      - uses: addnab/docker-run-action@v3
+        with:
+          registry: ghcr.io
+          image: pangoraw/bedrock:latest
+          options: -v ${{ github.workspace }}/docs:/vault
+          run: bedrock export /vault --output /vault/public --title="Bedrock Docs" --root-url="bedrock"
+      # - name: Bedrock Export
+      #   run: |
+      #     ls
+      #     ls docs
+      #     docker run --rm --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest ls -lah /vault # bedrock export /vault --output /vault/public
+      #     # docker run --rm \
+      #     #   --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest \
+      #     #   bedrock export /vault \
+      #     #     --output=/vault/public \
+      #     #     --title="Bedrock Docs" \
+      #     #     --root-url=bedrock
       - name: Push to Github pages
         uses: actions/upload-pages-artifact@v3.0
         with:
