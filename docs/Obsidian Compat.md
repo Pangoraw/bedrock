@@ -1,6 +1,8 @@
 ---
-tags: OT
+tags:
+ - Compat
 ---
+
 https://help.obsidian.md/How+to/Format+your+notes
 
 1. This is a list

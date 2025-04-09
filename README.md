@@ -6,6 +6,10 @@
 bedrock export <PATH_TO_VAULT>
 ```
 
+## Setting up automatic GitHub pages
+
+You can use [the documentation workflow](https://github.com/Pangoraw/bedrock/blob/main/.github/workflows/Docs.yml) as an example.
+
 ## Setting up automatic Gitlab pages
 
 Create this `.gitlab-ci.yml` file at the root of your repo/vault. Make sure to enable CI/CD and enable shared runners (also that the tags in the job definitions are the right ones).

@@ -24,17 +24,6 @@ jobs:
           image: ghcr.io/pangoraw/bedrock:latest
           options: -v ${{ github.workspace }}/docs:/vault
           run: bedrock export /vault --output /vault/public --title="Bedrock Docs" --root-url="bedrock"
-      # - name: Bedrock Export
-      #   run: |
-      #     ls
-      #     ls docs
-      #     docker run --rm --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest ls -lah /vault # bedrock export /vault --output /vault/public
-      #     # docker run --rm \
-      #     #   --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest \
-      #     #   bedrock export /vault \
-      #     #     --output=/vault/public \
-      #     #     --title="Bedrock Docs" \
-      #     #     --root-url=bedrock
       - name: Push to Github pages
         uses: actions/upload-pages-artifact@v3.0
         with:
