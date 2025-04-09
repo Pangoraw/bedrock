@@ -12,7 +12,7 @@ Create this `.gitlab-ci.yml` file at the root of your repo/vault. Make sure to e
 
 ```yaml
 # The Docker image that will be used to build your app
-image: registry.gitlab.inria.fr/pberg/bedrock:latest
+image: ghcr.io/pangoraw/bedrock:latest
 
 pages:
   # Depending on your gitlab instance you need to specify specific tags for runners
