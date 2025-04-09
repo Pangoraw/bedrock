@@ -23,7 +23,7 @@ jobs:
         run: |
           ls
           ls docs
-          docker run --rm --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest bedrock export /vault --output /vault/public
+          docker run --rm --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest ls -lah /vault # bedrock export /vault --output /vault/public
           # docker run --rm \
           #   --volume ./docs:/vault ghcr.io/pangoraw/bedrock:latest \
           #   bedrock export /vault \
