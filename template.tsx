@@ -10,6 +10,12 @@ import { slugify } from "https://deno.land/x/slugify@0.3.0/mod.ts";
 
 import { Note, Vault } from "./Vault.ts";
 
+function renderToStaticMarkupWithDoctype(el): string {
+  const markup = ReactDOMServer.renderToStaticMarkup(el);
+  return `<!doctype html>
+    ${markup}`;
+}
+
 const TreeView = ({ path, absPath }: { absPath: string; path: string }) => {
   const gen = Deno.readDirSync(path);
   const entries = [];
@@ -137,7 +143,7 @@ export const searchPage = (vault: Vault) => {
     </>,
   );
 
-  return ReactDOMServer.renderToStaticMarkup(
+  return renderToStaticMarkupWithDoctype(
     template(prettyTitle(vault, "Search"), content, rootUrl),
   );
 };
@@ -165,7 +171,7 @@ export const renderLinksList = (
       </ul>
     </>,
   );
-  return ReactDOMServer.renderToStaticMarkup(
+  return renderToStaticMarkupWithDoctype(
     template(prettyTitle(vault, title), list, vault.rootUrl),
   );
 };
@@ -193,7 +199,7 @@ export const renderNotesList = (
         : undefined}
     </>,
   );
-  return ReactDOMServer.renderToStaticMarkup(
+  return renderToStaticMarkupWithDoctype(
     template(prettyTitle(vault, title), list, vault.rootUrl),
   );
 };
@@ -229,7 +235,7 @@ export const renderGraphPage = (vault: Vault): string => {
     </html>
   );
 
-  return ReactDOMServer.renderToStaticMarkup(content);
+  return renderToStaticMarkupWithDoctype(content);
 };
 
 const formatDate = (d: Date): string =>
@@ -280,8 +286,6 @@ const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
 
   return undefined;
 };
-
-const TableOfContent = ({ note }) => {};
 
 export const render = (vault: Vault, title: string, note: Note): string => {
   const renderedContent = note.render();
@@ -342,7 +346,7 @@ export const render = (vault: Vault, title: string, note: Note): string => {
       <script src={join("/", vault.rootUrl, "obsidian", "toc.js")} />
     </>,
   );
-  return ReactDOMServer.renderToStaticMarkup(
+  return renderToStaticMarkupWithDoctype(
     template(prettyTitle(vault, title), content, vault.rootUrl),
   );
 };
