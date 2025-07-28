@@ -96,6 +96,7 @@ mjx-container {
   }
 
   #bedrock-toc {
+    overflow: hidden;
     position: fixed;
     display: block;
     width: 300px;
@@ -108,6 +109,10 @@ mjx-container {
 
 #bedrock-toc > a {
   @apply text-sm m-0 hover:bg-sky-200 px-2 py-1 hover:cursor-pointer no-underline block;
+}
+
+#bedrock-toc a.in-view {
+  @apply bg-gray-200 dark:bg-indigo-600 border-r-4 border-indigo-300;
 }
 
 #bedrock-toc a.link-H2 {

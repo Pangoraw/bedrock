@@ -1419,6 +1419,7 @@ mjx-container {
   }
 
   #bedrock-toc {
+    overflow: hidden;
     position: fixed;
     display: block;
     width: 300px;
@@ -1457,6 +1458,19 @@ mjx-container {
   cursor: pointer;
   --tw-bg-opacity: 1;
   background-color: rgb(186 230 253 / var(--tw-bg-opacity, 1));
+}
+
+#bedrock-toc a.in-view {
+  border-right-width: 4px;
+  --tw-border-opacity: 1;
+  border-color: rgb(165 180 252 / var(--tw-border-opacity, 1));
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
+}
+
+#bedrock-toc a.in-view:is(.dark *) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(79 70 229 / var(--tw-bg-opacity, 1));
 }
 
 #bedrock-toc a.link-H2 {
