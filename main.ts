@@ -178,6 +178,7 @@ const exportVault = async (vault: Vault, dest: string) => {
     Deno.writeTextFile(join(graphDir, "graph.json"), JSON.stringify(graph)),
     Deno.writeTextFile(join(graphDir, "index.html"), renderGraphPage(vault)),
     copy(join(__dirname, "graph.js"), join(graphDir, "graph.js")),
+    copy(join(__dirname, "theme.js"), join(miscPath, "theme.js")),
   ]);
 
   console.log("Done!");

@@ -73,6 +73,10 @@ ul.contains-task-list {
     @apply not-italic my-0;
 }
 
+.prose td, .prose table {
+    @apply dark:text-gray-300;
+}
+
 mjx-container svg {
   display: inline;
 }

@@ -66,25 +66,37 @@ const template = (name: string, content: any, rootUrl = "/") => {
       </head>
       <body className="dark:bg-zinc-800">
         <div className="">
-          <nav className="print:hidden mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl mb-5 py-2 border-b border-zinc-200 flex">
-            <a
-              className="flex hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
-              href={join("/", rootUrl)}
+          <nav className="print:hidden mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl mb-5 py-2 border-b border-zinc-200 flex justify-between">
+            <div className="flex">
+              <a
+                className="hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
+                href={join("/", rootUrl)}
+              >
+                Home
+              </a>
+              <a
+                className="ml-4 hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
+                href={join("/", rootUrl, "obsidian", "tags")}
+              >
+                Tags
+              </a>
+              <a
+                className="ml-4 flex hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
+                href={join("/", rootUrl, "obsidian", "search")}
+              >
+                Search
+              </a>
+            </div>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: `
+            <button onclick="toggleTheme()" class="focus:border-none h-6 w-6 mr-1">
+              <p id="bedrockThemeSelector">🌝</p>
+            </button>
+            `,
+              }}
             >
-              Home
-            </a>
-            <a
-              className="ml-4 flex hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
-              href={join("/", rootUrl, "obsidian", "tags")}
-            >
-              Tags
-            </a>
-            <a
-              className="ml-4 flex hover:text-gray-900 text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-100"
-              href={join("/", rootUrl, "obsidian", "search")}
-            >
-              Search
-            </a>
+            </div>
           </nav>
 
           {/* <main className="mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl max-w-none flex"> */}
@@ -101,6 +113,7 @@ const template = (name: string, content: any, rootUrl = "/") => {
           {/* </main> */}
         </div>
       </body>
+      <script src={join("/", rootUrl, "obsidian", "theme.js")}></script>
     </html>
   );
 };
@@ -267,7 +280,7 @@ const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
   return undefined;
 };
 
-const TableOfContent = ({ note }) => {}
+const TableOfContent = ({ note }) => {};
 
 export const render = (vault: Vault, title: string, note: Note): string => {
   const renderedContent = note.render();
