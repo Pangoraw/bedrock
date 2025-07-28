@@ -6,6 +6,7 @@ import {
 import ReactDOMServer from "https://jspm.dev/react-dom@16.14.0/server";
 import React from "https://jspm.dev/react@16.14.0";
 import { default as titleCase } from "https://deno.land/x/case@2.2.0/titleCase.ts";
+import { slugify } from "https://deno.land/x/slugify@0.3.0/mod.ts";
 
 import { Note, Vault } from "./Vault.ts";
 
@@ -289,8 +290,11 @@ export const render = (vault: Vault, title: string, note: Note): string => {
   const backNotes = [...note.backlinks];
   const content = proseStyle(
     <>
-      {addTitle ? <h1>{note.name()}</h1> : undefined}
-      <div id="bedrock-toc"></div>
+      {addTitle ? <h1 id={slugify(note.name())}>{note.name()}</h1> : undefined}
+      <div id="bedrock-toc">
+        <p id="bedrock-toc-title" className="">Table of contents</p>
+        <hr />
+      </div>
       {Object.keys(note.properties).length > 0
         ? (
           <table className="mb-0">
