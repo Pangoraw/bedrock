@@ -295,7 +295,9 @@ export const render = (vault: Vault, title: string, note: Note): string => {
   const backNotes = [...note.backlinks];
   const content = proseStyle(
     <>
-      {addTitle ? <h1 id={slugify(note.name())}>{note.name()}</h1> : undefined}
+      {addTitle
+        ? <h1 id={slugify(note.name(), { lower: true })}>{note.name()}</h1>
+        : undefined}
       {note.headings.length > 0
         ? (
           <div id="bedrock-toc">

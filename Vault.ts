@@ -155,14 +155,13 @@ export class Vault {
 
       if (tokens.length > idx + 1) {
         const inlineToken = tokens[idx + 1];
-        if (
-          inlineToken.type === "inline" &&
-          inlineToken.children.length === 1 &&
-          inlineToken.children[0].type === "text"
-        ) {
-          const textToken = inlineToken.children[0];
-          env.addHeading(textToken.content, token.tag);
-          token.attrSet("id", slugify(textToken.content));
+        if (inlineToken.type === "inline") {
+          const content = inlineToken.children.reduce(
+            (acc, t) => (acc + t.content),
+            "",
+          );
+          env.addHeading(content, token.tag);
+          token.attrSet("id", slugify(content, { lower: true }));
         }
       }
       return headerDefault(tokens, idx, options, env, self);
