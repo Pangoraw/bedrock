@@ -71,7 +71,8 @@ const template = (name: string, content: any, rootUrl = "/") => {
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css"></link>
         <title>{name}</title>
       </head>
-      <body className="dark:bg-zinc-800">
+      <body className="dark:bg-zinc-700 dark:text-zinc-100">
+        <meta content="#fff" name="theme-color"></meta>
         <div className="">
           <nav className="print:hidden mx-4 md:mx-auto md:max-w-xl xl:max-w-3xl mb-5 py-2 border-b border-zinc-200 flex justify-between">
             <div className="flex">
@@ -295,10 +296,14 @@ export const render = (vault: Vault, title: string, note: Note): string => {
   const content = proseStyle(
     <>
       {addTitle ? <h1 id={slugify(note.name())}>{note.name()}</h1> : undefined}
-      <div id="bedrock-toc">
-        <p id="bedrock-toc-title" className="">Table of contents</p>
-        <hr />
-      </div>
+      {note.headings.length > 0
+        ? (
+          <div id="bedrock-toc">
+            <p id="bedrock-toc-title" className="">Table of contents</p>
+            <hr />
+          </div>
+        )
+        : undefined}
       {Object.keys(note.properties).length > 0
         ? (
           <table className="mb-0">

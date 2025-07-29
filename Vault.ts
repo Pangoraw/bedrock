@@ -161,11 +161,9 @@ export class Vault {
           inlineToken.children[0].type === "text"
         ) {
           const textToken = inlineToken.children[0];
+          env.addHeading(textToken.content, token.tag);
           token.attrSet("id", slugify(textToken.content));
         }
-      }
-      if (token.tag === "h1") {
-        env.hasTitle = true;
       }
       return headerDefault(tokens, idx, options, env, self);
     };
@@ -251,6 +249,7 @@ export class Note {
   backlinks: Set<Note> = new Set();
   forwardLinks: Set<Note> = new Set();
   properties: { [key: string]: any } = {};
+  headings: Array<string> = [];
 
   hasTitle = false;
   private cached_content: Optional<string> = null;
@@ -297,7 +296,6 @@ export class Note {
       console.warn(`error: rendering ${this.name()}:\n${msg}`);
       this.cached_content = "<pre><code>" + msg + "</code></pre>";
     }
-    this.hasTitle = env.hasTitle;
     return this.cached_content;
   }
 
@@ -320,8 +318,6 @@ export class Note {
 }
 
 export class ParseEnv {
-  hasTitle = false;
-
   constructor(private currentNote: Note, public vault: Vault) {}
 
   addProperty(key: string, value: any) {
@@ -340,6 +336,13 @@ export class ParseEnv {
   addTag(tag: string) {
     this.currentNote.tags.push(tag);
     this.vault.addTagRef(tag, this.currentNote);
+  }
+
+  addHeading(heading: string, tag: string) {
+    this.currentNote.headings.push(heading);
+    if (tag === "h1") {
+      this.currentNote.hasTitle = true;
+    }
   }
 
   findAsset(name: string): string {
