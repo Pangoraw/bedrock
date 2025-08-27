@@ -1539,6 +1539,14 @@ mjx-container {
   margin-top: 0.75rem;
 }
 
+.prose-p\:m-0 :is(:where(p):not(:where([class~="not-prose"],[class~="not-prose"] *))) {
+  margin: 0px;
+}
+
+.prose-img\:rounded :is(:where(img):not(:where([class~="not-prose"],[class~="not-prose"] *))) {
+  border-radius: 0.25rem;
+}
+
 .dark\:bg-zinc-700:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(63 63 70 / var(--tw-bg-opacity, 1));

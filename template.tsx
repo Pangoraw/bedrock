@@ -8,7 +8,7 @@ import React from "https://jspm.dev/react@16.14.0";
 import { default as titleCase } from "https://deno.land/x/case@2.2.0/titleCase.ts";
 import { slugify } from "https://deno.land/x/slugify@0.3.0/mod.ts";
 
-import { Note, Vault } from "./Vault.ts";
+import { Note, ParseEnv, Vault } from "./Vault.ts";
 
 function renderToStaticMarkupWithDoctype(el): string {
   const markup = ReactDOMServer.renderToStaticMarkup(el);
@@ -150,7 +150,7 @@ export const searchPage = (vault: Vault) => {
 };
 
 const proseStyle = (component: any) => (
-  <div className="max-w-none prose prose-zinc dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3">
+  <div className="max-w-none prose prose-zinc prose-img:rounded dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3">
     {component}
   </div>
 );
@@ -244,7 +244,9 @@ const formatDate = (d: Date): string =>
   (d.getMonth() + 1).toString().padStart(2, "0") + "/" +
   d.getFullYear().toString();
 
-const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
+const renderProperties = (note: Note, prop: any, tags: boolean) => {
+  const vault = note.vault;
+
   if (tags && typeof prop == "string") {
     const delta = 0 + prop.startsWith("#");
     return (
@@ -261,12 +263,22 @@ const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
     if (prop.startsWith("http://") || prop.startsWith("https://")) {
       return <a target="_blank" href={prop}>{prop}</a>;
     }
-    return <span>{prop}</span>;
+
+    const env = new ParseEnv(note, note.vault);
+    const content = vault.renderer.render(prop, env);
+
+    return (
+      <div
+        className="prose-p:m-0"
+        dangerouslySetInnerHTML={{ __html: content }}
+      >
+      </div>
+    );
   }
 
   if (Array.isArray(prop)) {
     return prop.map((p, i) => (
-      <span key={i} className="mr-2">{renderProperties(vault, p, tags)}</span>
+      <span key={i} className="mr-2">{renderProperties(note, p, tags)}</span>
     ));
   }
 
@@ -290,7 +302,7 @@ const renderProperties = (vault: Vault, prop: any, tags: boolean) => {
 
 export const render = (vault: Vault, title: string, note: Note): string => {
   const renderedContent = note.render();
-  const addTitle = !note.hasTitle;
+  const addTitle = !note.hasTjtle;
 
   const backNotes = [...note.backlinks];
   const content = proseStyle(
@@ -301,6 +313,7 @@ export const render = (vault: Vault, title: string, note: Note): string => {
       {note.headings.length > 0
         ? (
           <div id="bedrock-toc">
+            ParseEnv
             <p id="bedrock-toc-title" className="">Table of contents</p>
             <hr />
           </div>
@@ -320,7 +333,7 @@ export const render = (vault: Vault, title: string, note: Note): string => {
                 <tr key={k}>
                   <td className="">{titleCase(k)}</td>
                   <td className="">
-                    {renderProperties(vault, v, k === "tags")}
+                    {renderProperties(note, v, k === "tags")}
                   </td>
                 </tr>
               ))}
