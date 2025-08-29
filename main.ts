@@ -20,6 +20,7 @@ import * as flags from "https://deno.land/std@0.165.0/flags/mod.ts";
 import { Vault } from "./Vault.ts";
 import {
   render,
+  renderBase,
   renderGraphPage,
   renderIndexPage,
   renderLinksList,
@@ -28,6 +29,7 @@ import {
 } from "./template.tsx";
 import { generateCss } from "./tailwind.ts";
 import { buildIndex } from "./search.ts";
+import { Base } from "./base.ts";
 
 const nodeConnectivity = (x: number): number =>
   0.25 * Math.sqrt(Math.max(1, x));
@@ -85,9 +87,25 @@ const exportVault = async (vault: Vault, dest: string) => {
         const targetHtmlFile = targetPath.replace(".md", ".html");
         await ensureFile(targetHtmlFile);
         await Deno.writeTextFile(targetHtmlFile, htmlContent);
+      } else if (entry.name.endsWith(".base")) {
+        if (vault.renderBases) {
+          vault.basePaths.push(relPath);
+        }
       } else if (entry.name !== ".gitignore") {
         await copy(entry.path, targetPath, { overwrite: true });
       }
+    }
+  }
+
+  for (const basePath of vault.basePaths) {
+    const base = new Base(vault, join(vault.path, basePath));
+
+    for (const view of base.definition.views ?? []) {
+      const htmlContent = renderBase(base, view);
+
+      const targetHtmlFile = join(dest, basePath, view.name + ".html");
+      await ensureFile(targetHtmlFile);
+      await Deno.writeTextFile(targetHtmlFile, htmlContent);
     }
   }
 
@@ -119,6 +137,9 @@ const exportVault = async (vault: Vault, dest: string) => {
       renderNotesList(vault, `#${tag}`, [...notes], true, true),
     );
   }
+
+  const baseViewFile = join(dest, "obsidian", "baseView.js");
+  await copy(join(__dirname, "baseView.js"), baseViewFile);
 
   const searchDir = join(miscPath, "search");
   await ensureDir(searchDir);
@@ -213,7 +234,7 @@ if (!COMMANDS.includes(cmd)) {
 const options = flags.parse(Deno.args.slice(2), {
   string: ["title", "output", "attachment-folder-path", "root-url"],
   negatable: ["css"],
-  boolean: ["no-graph-on-each-page"],
+  boolean: ["no-graph-on-each-page", "no-render-bases"],
 });
 
 if (cmd === "generate-css" || options.css) {
@@ -233,6 +254,7 @@ const vault = new Vault(vaultPath, {
   rootUrl: options["root-url"],
   graphOnEachPage: !options["no-graph-on-each-page"],
   title: options.title,
+  renderBases: !options["no-render-bases"],
 });
 console.log("Found", vault.notes.length, "notes");
 

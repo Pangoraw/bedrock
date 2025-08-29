@@ -9,6 +9,8 @@ import { default as titleCase } from "https://deno.land/x/case@2.2.0/titleCase.t
 import { slugify } from "https://deno.land/x/slugify@0.3.0/mod.ts";
 
 import { Note, ParseEnv, Vault } from "./Vault.ts";
+import { Base, defaultEvaluationEnv, File, Item, View } from "./base.ts";
+import { evaluate, parse } from "./formula.ts";
 
 function renderToStaticMarkupWithDoctype(el): string {
   const markup = ReactDOMServer.renderToStaticMarkup(el);
@@ -123,6 +125,121 @@ const template = (name: string, content: any, rootUrl = "/") => {
       </body>
       <script src={join("/", rootUrl, "obsidian", "theme.js")}></script>
     </html>
+  );
+};
+
+export const renderBase = (base: Base, view: View): string => {
+  if (
+    !base.definition.views ||
+    base.definition.views.length == 0
+  ) throw "invalid";
+
+  const renderOrder = (order: string, it: Item, note: Note) => {
+    const env = {
+      file: File.fromNote(note),
+      ...defaultEvaluationEnv(),
+      ...it,
+    };
+
+    const expr = parse(order);
+    const value = evaluate(expr, env);
+
+    return renderProperties(
+      note,
+      value,
+      false,
+    );
+  };
+
+  const items = base.getViewItems(view);
+
+  let content;
+  if (view.type == "table") {
+    content = (
+      <table className="prose-img:m-0 prose-img:h-12">
+        <thead>
+          {view.order.map((o) => <td key={o}>{base.displayName(o)}</td>)}
+        </thead>
+        <tbody>
+          {items.map(
+            (it, i) => (
+              <tr key={i}>
+                {view.order.map((o) => (
+                  <td key={o}>
+                    {renderOrder(o, it, base.notes[i])}
+                  </td>
+                ))}
+              </tr>
+            ),
+          )}
+        </tbody>
+      </table>
+    );
+  } else if (view.type == "cards") {
+    content = (
+      <div className="grid grid-cols-3 gap-4">
+        {items.map(
+          (it, i) => (
+            <div
+              key={i}
+              className="border rounded-lg shadow-md prose-img:rounded-none prose-img:m-0"
+            >
+              <div
+                className="h-32 w-full bg-cover bg-center rounded-t-lg"
+                style={{
+                  backgroundImage: `url('${
+                    evaluate(parse(view.image), it).src
+                  }')`,
+                }}
+              >
+              </div>
+              <div className="p-3 prose-p:m-0 prose-a:no-underline">
+                {view.order.map((o, io) => (
+                  <div key={o} className="leading-5 mb-2 last:mb-0">
+                    {io > 0
+                      ? <p className="text-xs text-gray-600">{o}</p>
+                      : undefined}
+                    {renderOrder(o, it, base.notes[i])}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ),
+        )}
+      </div>
+    );
+  } else {
+    throw new Error("unknown view type " + view.type);
+  }
+
+  return renderToStaticMarkupWithDoctype(
+    template(
+      <>{base.name} &middot; {prettyTitle(base.vault, view.name)}</>,
+      proseStyle(
+        <>
+          {content}
+
+          <div className="mt-4">
+            <label htmlFor="view" className="mr-3">View:</label>
+            <select name="view" id="base-view">
+              {base.definition.views?.map((v) => (
+                <option
+                  selected={v.name == view.name}
+                  key={v.name}
+                  value={base.getViewURL(v)}
+                >
+                  {v.name}
+                </option>
+              ))}
+            </select>
+            <script
+              src={join("/", base.vault.rootUrl, "obsidian", "baseView.js")}
+            />
+          </div>
+        </>,
+      ),
+      base.vault.rootUrl,
+    ),
   );
 };
 
@@ -264,16 +381,19 @@ const renderProperties = (note: Note, prop: any, tags: boolean) => {
       return <a target="_blank" href={prop}>{prop}</a>;
     }
 
-    const env = new ParseEnv(note, note.vault);
-    const content = vault.renderer.render(prop, env);
-
-    return (
-      <div
-        className="prose-p:m-0"
-        dangerouslySetInnerHTML={{ __html: content }}
-      >
-      </div>
-    );
+    const env = new ParseEnv(note);
+    try {
+      const content = vault.renderer.renderInline(prop, env);
+      return (
+        <span
+          className="prose-p:m-0"
+          dangerouslySetInnerHTML={{ __html: content }}
+        >
+        </span>
+      );
+    } catch {
+      return <span>{prop}</span>;
+    }
   }
 
   if (Array.isArray(prop)) {
@@ -295,6 +415,18 @@ const renderProperties = (note: Note, prop: any, tags: boolean) => {
         readOnly
       />
     );
+  }
+
+  if (typeof prop === "object" && prop?.type === "link") {
+    return (
+      <a className="block truncate text-ellipsis" href={prop.href}>
+        {prop.text}
+      </a>
+    );
+  }
+
+  if (typeof prop === "object" && prop?.type === "image") {
+    return <img src={prop.src}></img>;
   }
 
   return undefined;

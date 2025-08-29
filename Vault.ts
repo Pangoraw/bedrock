@@ -41,26 +41,31 @@ type VaultOptions = {
   rootUrl: string | undefined;
   graphOnEachPage: boolean;
   title: string | undefined;
+  renderBases: boolean;
 };
 export class Vault {
   notes: Array<Note> = [];
+  basePaths: string[] = [];
   path: string;
   rootUrl: string;
   assetPath: string;
   files: Array<string>;
   renderer: MarkdownItType;
   tags: Record<string, Set<Note>> = {};
-  renderGraphOnEachPage = true;
+  renderGraphOnEachPage: boolean = true;
+  renderBases: boolean = true;
   title: string | undefined;
 
   constructor(
     path: string,
-    { attachmentFolderPath, rootUrl, graphOnEachPage, title }: VaultOptions = {
-      attachmentFolderPath: undefined,
-      rootUrl: undefined,
-      graphOnEachPage: true,
-      title: undefined,
-    },
+    { attachmentFolderPath, rootUrl, graphOnEachPage, renderBases, title }:
+      VaultOptions = {
+        attachmentFolderPath: undefined,
+        rootUrl: undefined,
+        graphOnEachPage: true,
+        title: undefined,
+        renderBases: true,
+      },
   ) {
     this.path = path;
     this.rootUrl = rootUrl === undefined ? "/" : rootUrl;
@@ -68,6 +73,7 @@ export class Vault {
     this.title = title;
 
     this.renderGraphOnEachPage = graphOnEachPage;
+    this.renderBases = renderBases;
 
     if (!attachmentFolderPath) {
       const obsConfig = JSON.parse(
@@ -138,6 +144,8 @@ export class Vault {
           return `<iframe width="640" height="360" src="https://www.youtube.com/embed/${videoId}"></iframe>`;
         }
       }
+
+      env.addEmbed(src);
 
       return imageDefault(tokens, idx, options, env, self);
     };
@@ -249,13 +257,14 @@ export class Note {
   forwardLinks: Set<Note> = new Set();
   properties: { [key: string]: any } = {};
   headings: Array<string> = [];
+  embeds: string[] = [];
 
   hasTitle = false;
   private cached_content: Optional<string> = null;
 
   textContent(): string {
     const fileContent = Deno.readTextFileSync(this.absPath());
-    const env = new ParseEnv(this, this.vault);
+    const env = new ParseEnv(this);
     const tokens: Array<Token> = this.vault.renderer.parse(fileContent, env);
 
     const content: Array<string> = [];
@@ -277,7 +286,7 @@ export class Note {
 
   renderTokens(): Array<Token> {
     const fileContent = Deno.readTextFileSync(this.absPath());
-    const env = new ParseEnv(this, this.vault);
+    const env = new ParseEnv(this);
     return this.vault.renderer.parse(fileContent, env);
   }
 
@@ -287,7 +296,7 @@ export class Note {
     }
 
     const fileContent = Deno.readTextFileSync(this.absPath());
-    const env = new ParseEnv(this, this.vault);
+    const env = new ParseEnv(this);
     try {
       this.cached_content = this.vault.renderer.render(fileContent, env);
     } catch (exception) {
@@ -317,7 +326,11 @@ export class Note {
 }
 
 export class ParseEnv {
-  constructor(private currentNote: Note, public vault: Vault) {}
+  public vault: Vault;
+
+  constructor(private currentNote: Note) {
+    this.vault = this.currentNote.vault;
+  }
 
   addProperty(key: string, value: any) {
     this.currentNote.properties[key] = value;
@@ -335,6 +348,10 @@ export class ParseEnv {
   addTag(tag: string) {
     this.currentNote.tags.push(tag);
     this.vault.addTagRef(tag, this.currentNote);
+  }
+
+  addEmbed(url: string) {
+    this.currentNote.embeds.push(url);
   }
 
   addHeading(heading: string, tag: string) {
