@@ -1,8 +1,8 @@
 import lunr from "npm:lunr";
+import { basename, join } from "@std/path";
+
 import { Vault } from "./Vault.ts";
 import { Base } from "./base.ts";
-import { basename } from "https://deno.land/std@0.165.0/path/posix.ts";
-import { join } from "https://deno.land/std@0.165.0/path/mod.ts";
 
 export const buildIndex = async (vault: Vault, destFile: string) => {
   const documents = vault.notes.map((note) => ({

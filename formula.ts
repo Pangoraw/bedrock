@@ -1,5 +1,4 @@
-import { assertEquals, assertThrows } from "jsr:@std/assert";
-import { File } from "./base.ts";
+import { assertEquals, assertThrows } from "@std/assert";
 
 type ASTNode = number | string | {
   head: "+" | "-" | "*" | "/" | "%" | "call" | "getproperty" | "identifier";

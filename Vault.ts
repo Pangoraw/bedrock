@@ -1,11 +1,5 @@
-import {
-  dirname,
-  join,
-  parse,
-  relative,
-} from "https://deno.land/std@0.165.0/path/posix.ts";
-import { walkSync } from "https://deno.land/std@0.165.0/fs/walk.ts";
-import { existsSync } from "https://deno.land/std@0.165.0/node/fs.ts";
+import { dirname, join, parse, relative } from "@std/path";
+import { existsSync, walkSync } from "@std/fs";
 import { slugify } from "https://deno.land/x/slugify@0.3.0/mod.ts";
 
 import MarkdownIt from "npm:markdown-it";

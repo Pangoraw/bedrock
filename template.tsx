@@ -1,8 +1,4 @@
-import {
-  basename,
-  join,
-  relative,
-} from "https://deno.land/std@0.165.0/path/posix.ts";
+import { basename, join, relative } from "@std/path";
 import ReactDOMServer from "https://jspm.dev/react-dom@16.14.0/server";
 import React from "https://jspm.dev/react@16.14.0";
 import { default as titleCase } from "https://deno.land/x/case@2.2.0/titleCase.ts";
@@ -132,7 +128,7 @@ export const renderBase = (base: Base, view: View): string => {
   if (
     !base.definition.views ||
     base.definition.views.length == 0
-  ) throw "invalid";
+  ) throw new Error("invalid");
 
   const renderOrder = (order: string, it: Item, note: Note) => {
     const env = {

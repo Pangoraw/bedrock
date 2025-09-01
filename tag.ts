@@ -1,5 +1,4 @@
-import { env } from "https://deno.land/std@0.165.0/node/process.ts";
-import { join } from "https://deno.land/std@0.165.0/path/win32.ts";
+import { join } from "@std/path";
 import { MarkdownIt, ParseInlineState } from "./ParseState.ts";
 import { ParseEnv } from "./Vault.ts";
 

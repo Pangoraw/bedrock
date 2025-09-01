@@ -1,21 +1,8 @@
-import { serve } from "https://deno.land/std@0.165.0/http/server.ts";
-import { serveDir } from "https://deno.land/std@0.165.0/http/file_server.ts";
-import {
-  dirname,
-  fromFileUrl,
-  join,
-  normalize,
-  relative,
-} from "https://deno.land/std@0.165.0/path/posix.ts";
-import {
-  copy,
-  ensureDir,
-  ensureFile,
-  exists,
-  walk,
-} from "https://deno.land/std@0.165.0/fs/mod.ts";
-import { rmdir } from "https://deno.land/std@0.165.0/node/fs/promises.ts";
-import * as flags from "https://deno.land/std@0.165.0/flags/mod.ts";
+import { serveDir } from "@std/http";
+import { dirname, fromFileUrl, join, normalize, relative } from "@std/path";
+import { copy, ensureDir, ensureFile, exists, walk } from "@std/fs";
+import { removeSync as rmdir } from "@std/fs/unstable-remove";
+import * as flags from "jsr:@std/flags";
 
 import { Vault } from "./Vault.ts";
 import {
@@ -206,9 +193,9 @@ const exportVault = async (vault: Vault, dest: string) => {
   console.log("Done!");
 };
 
-const httpServer = async (rootUrl: string, dest: string) => {
+const httpServer = (rootUrl: string, dest: string) => {
   if (rootUrl.endsWith("/")) rootUrl = rootUrl.slice(0, rootUrl.length - 1);
-  await serve(
+  Deno.serve(
     (req) => {
       return serveDir(req, { urlRoot: rootUrl, fsRoot: dest });
     },
@@ -224,6 +211,10 @@ let cmd = "serve";
 if (Deno.args.length >= 1) {
   cmd = Deno.args[0];
 }
+
+addEventListener("error", (event) => {
+  console.log(event);
+});
 
 const COMMANDS = ["serve", "export", "generate-css"];
 
