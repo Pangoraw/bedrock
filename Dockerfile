@@ -6,5 +6,7 @@ COPY . /bedrock
 WORKDIR /bedrock
 RUN rm package.json
 
-RUN deno install --global --allow-import --allow-read --allow-write --allow-net --allow-run main.ts
+RUN deno install --global --allow-import --allow-read --allow-write --allow-net --allow-run --config deno.json main.ts
+
+WORKDIR /
 CMD ["bedrock",  "export", "/vault"]

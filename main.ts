@@ -2,7 +2,7 @@ import { serveDir } from "@std/http";
 import { dirname, fromFileUrl, join, normalize, relative } from "@std/path";
 import { copy, ensureDir, ensureFile, exists, walk } from "@std/fs";
 import { removeSync as rmdir } from "@std/fs/unstable-remove";
-import * as flags from "@std/flags";
+import { parseArgs } from "@std/cli";
 
 import { Vault } from "./Vault.ts";
 import {
@@ -222,7 +222,7 @@ if (!COMMANDS.includes(cmd)) {
   throw new Error(`invalid command '${cmd}'`);
 }
 
-const options = flags.parse(Deno.args.slice(2), {
+const options = parseArgs(Deno.args.slice(2), {
   string: ["title", "output", "attachment-folder-path", "root-url"],
   negatable: ["css"],
   boolean: ["no-graph-on-each-page", "no-render-bases"],
