@@ -1,4 +1,4 @@
-FROM denoland/deno:alpine-1.29.2
+FROM denoland/deno:alpine
 
 RUN mkdir /bedrock
 COPY . /bedrock
