@@ -2,7 +2,7 @@ import { serveDir } from "@std/http";
 import { dirname, fromFileUrl, join, normalize, relative } from "@std/path";
 import { copy, ensureDir, ensureFile, exists, walk } from "@std/fs";
 import { removeSync as rmdir } from "@std/fs/unstable-remove";
-import * as flags from "jsr:@std/flags";
+import * as flags from "@std/flags";
 
 import { Vault } from "./Vault.ts";
 import {
