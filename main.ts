@@ -27,7 +27,7 @@ const exportVault = async (vault: Vault, dest: string) => {
 
   if (await exists(dest)) {
     console.log(`Removing ${dest}...`);
-    await rmdir(dest, {
+    rmdir(dest, {
       recursive: true,
     });
   }
