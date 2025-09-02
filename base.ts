@@ -91,22 +91,24 @@ export class Base {
   }
 
   getViewItems(view: View): Item[] {
-    this.notes.sort((a, b) => {
-      // negative indicates a should come before b
-      // positive indicates a should come after b
-      // 0 or NaN indicates a and b are considered equals
-      for (const { property, direction } of view.sort) {
-        const ap = a.properties[property];
-        const bp = b.properties[property];
+    if (view.sort) {
+      this.notes.sort((a, b) => {
+        // negative indicates a should come before b
+        // positive indicates a should come after b
+        // 0 or NaN indicates a and b are considered equals
+        for (const { property, direction } of view.sort) {
+          const ap = a.properties[property];
+          const bp = b.properties[property];
 
-        if (ap == bp) continue;
+          if (ap == bp) continue;
 
-        if (ap > bp) return direction == "ASC" ? 1 : -1;
-        return direction == "ASC" ? -1 : 1;
-      }
+          if (ap > bp) return direction == "ASC" ? 1 : -1;
+          return direction == "ASC" ? -1 : 1;
+        }
 
-      return 0;
-    });
+        return 0;
+      });
+    }
 
     const env = defaultEvaluationEnv();
     const items = this.notes.map(
