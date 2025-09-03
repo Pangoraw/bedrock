@@ -22,6 +22,7 @@ export type View = {
   columnSize?: { [prop: string]: number };
 
   image?: string;
+  imageAspectRatio?: number;
 };
 
 export type PropertyDescription = {

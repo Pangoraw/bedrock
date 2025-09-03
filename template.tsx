@@ -181,8 +181,9 @@ export const renderBase = (base: Base, view: View): string => {
               className="border rounded-lg shadow-md prose-img:rounded-none prose-img:m-0"
             >
               <div
-                className="h-32 w-full bg-cover bg-center rounded-t-lg"
+                className="w-full bg-cover bg-center rounded-t-lg"
                 style={{
+                  aspectRatio: `${1 / view.imageAspectRatio ?? 1}`,
                   backgroundImage: `url('${
                     evaluate(parse(view.image), it).src
                   }')`,
