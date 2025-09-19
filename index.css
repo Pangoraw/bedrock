@@ -122,3 +122,7 @@ mjx-container {
 #bedrock-toc a.link-H3 {
   @apply pl-6;
 }
+
+li.task-list-item:has(> input.task-list-item-checkbox:checked) {
+  @apply line-through;
+}

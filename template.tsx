@@ -161,7 +161,7 @@ export const renderBase = (base: Base, view: View): string => {
             (it, i) => (
               <tr key={i}>
                 {view.order.map((o) => (
-                  <td key={o}>
+                  <td key={o} className="align-top">
                     {renderOrder(o, it, base.notes[i])}
                   </td>
                 ))}
@@ -178,7 +178,7 @@ export const renderBase = (base: Base, view: View): string => {
           (it, i) => (
             <div
               key={i}
-              className="border rounded-lg shadow-md prose-img:rounded-none prose-img:m-0"
+              className="border rounded-lg shadow-md prose-img:rounded-none"
             >
               <div
                 className="w-full bg-cover bg-center rounded-t-lg"
@@ -264,7 +264,7 @@ export const searchPage = (vault: Vault) => {
 };
 
 const proseStyle = (component: any) => (
-  <div className="max-w-none prose prose-zinc prose-img:rounded dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3">
+  <div className="max-w-none prose prose-zinc prose-img:rounded prose-img:mb-2 dark:prose-invert mb-5 prose-h2:mt-4 prose-h3:mt-3">
     {component}
   </div>
 );

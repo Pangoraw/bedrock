@@ -6,9 +6,11 @@ import {
   join,
   relative,
 } from "https://deno.land/std@0.165.0/path/mod.ts";
+import { default as titleCase } from "https://deno.land/x/case@2.2.0/titleCase.ts";
+import { parse as parseYaml } from "https://deno.land/std@0.194.0/yaml/mod.ts";
+
 import { Note, Vault } from "./Vault.ts";
 import { evaluate, parse } from "./formula.ts";
-import { parse as parseYaml } from "https://deno.land/std@0.194.0/yaml/mod.ts";
 
 export type Item = { [key: string]: any };
 
@@ -162,6 +164,11 @@ export class Base {
   }
 
   displayName(prop: string): string {
+    if (prop.startsWith("formula.")) return prop.slice("formula.".length);
+    if (prop.startsWith("file.")) {
+      return titleCase("File " + prop.slice("file.".length));
+    }
+
     if (
       !this.definition.properties ||
       !this.definition.properties[prop]
@@ -233,7 +240,7 @@ export class File {
     this.name = {
       type: "link",
       href,
-      text: withoutExt(s.length > 1 ? s[s.length - 2] : fullname),
+      text: withoutExt(fullname.slice(0, fullname.length - this.ext.length)),
     };
     this.basename = {
       type: "link",
